@@ -121,6 +121,24 @@ export default function Header({
                 {l.label}
               </Link>
             ))}
+            <div className="nav__lang" role="group" aria-label={dict.language}>
+              <Link
+                href={swap("en")}
+                className="nav__lang-btn"
+                aria-current={lang === "en" ? "true" : undefined}
+                onClick={() => setOpen(false)}
+              >
+                English
+              </Link>
+              <Link
+                href={swap("ar")}
+                className="nav__lang-btn"
+                aria-current={lang === "ar" ? "true" : undefined}
+                onClick={() => setOpen(false)}
+              >
+                العربية
+              </Link>
+            </div>
           </nav>
 
           <div className="nav__actions">

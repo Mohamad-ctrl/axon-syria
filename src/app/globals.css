@@ -186,6 +186,14 @@ p  { color: var(--body); }
   .nav__menu.is-open ~ .nav__actions .nav__toggle { display: none; }
 }
 
+/* Mobile language switch (the topbar EN/ع switch is hidden below 720px) */
+.nav__lang { display: none; }
+@media (max-width: 1000px) {
+  .nav__lang { display: flex; gap: .5rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+  .nav__lang-btn { flex: 1; text-align: center; padding: .7rem 1rem; border-radius: var(--radius-sm); font-family: var(--font-display); font-weight: 700; color: var(--ink); background: var(--bg-alt); border: 1px solid var(--line); transition: background var(--t-fast), color var(--t-fast); }
+  .nav__lang-btn[aria-current="true"] { background: var(--brand); color: #fff; border-color: var(--brand); }
+}
+
 /* ---------- Hero (designed gradient — no site photography yet) ---------- */
 .hero {
   position: relative; isolation: isolate; color: #fff; overflow: hidden;

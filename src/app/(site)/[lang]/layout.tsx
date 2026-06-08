@@ -56,6 +56,7 @@ export async function generateMetadata({
       url: `${SITE_URL}/${loc}`,
       locale: loc === "ar" ? "ar_SY" : "en_GB",
       alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
+      images: [{ url: `${SITE_URL}/api/og`, width: 1200, height: 630, alt: "Axon Syria" }],
     },
     twitter: { card: "summary" },
     icons: { icon: "/favicon.svg" },
