@@ -59,6 +59,7 @@ export async function generateMetadata({
     },
     twitter: { card: "summary" },
     icons: { icon: "/favicon.svg" },
+    verification: { google: "cK_3SUf6_35b75IDjZq37BitrT8v80GSGIHhXa8nJe8" },
   };
 }
 
