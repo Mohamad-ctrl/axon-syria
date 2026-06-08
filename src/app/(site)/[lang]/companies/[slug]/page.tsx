@@ -10,11 +10,21 @@ import { companyProfiles } from "@/data/company-profiles";
 import { companyCertificates, CERT_META } from "@/data/certificates";
 import { companyProjects, PROJECT_CAT } from "@/data/projects";
 import { ArrowRight } from "@/components/icons";
+import { SITE_URL } from "@/lib/site";
 
 // One static page per company slug, generated for each locale by the parent
 // `[lang]` layout. Content is fully static (dictionaries + data), so prerender it all.
 export function generateStaticParams() {
   return companyMeta.map((m) => ({ slug: m.slug }));
+}
+
+/** Concise, keyword + location-rich summary, shared by the meta description and
+ *  the Organization JSON-LD so they stay consistent. */
+function buildDescription(loc: string, name: string, tagline: string, serviceNames: string[]): string {
+  const svc = serviceNames.slice(0, 3);
+  return loc === "ar"
+    ? `${name} في سوريا${svc.length ? `: ${svc.join("، ")} وغيرها` : ""}. ${tagline} ضمن مجموعة أكسون سوريا.`
+    : `${name} in Syria${svc.length ? ` — ${svc.join(", ")} and more` : ""}. ${tagline} Part of the Axon Syria group.`;
 }
 
 export async function generateMetadata({
@@ -28,10 +38,38 @@ export async function generateMetadata({
   const idx = companyMeta.findIndex((m) => m.slug === slug);
   if (idx === -1) return {};
   const card = dict.companies.cards[idx];
+  const profile = companyProfiles[slug];
+  const tagline = profile ? (loc === "ar" ? profile.tagline.ar : profile.tagline.en) : card.desc;
+  const services = profile?.services ?? [];
+  const description = buildDescription(loc, card.name, tagline, services.map((s) => (loc === "ar" ? s.ar : s.en)));
+  const path = `/companies/${slug}`;
+  // Title carries the company name + its sector, so it matches "<company> syria"
+  // and disambiguates the five Axon-prefixed names (the template adds "| Axon Syria").
+  const titleWithSector = `${card.name} — ${card.tag}`;
   return {
-    title: card.name,
-    description: card.desc,
-    alternates: { canonical: `/${loc}/companies/${slug}` },
+    title: titleWithSector,
+    description,
+    keywords: [
+      card.name,
+      card.tag,
+      "Syria",
+      "Aleppo",
+      "أكسون سوريا",
+      ...services.map((s) => (loc === "ar" ? s.ar : s.en)),
+    ],
+    alternates: {
+      canonical: `/${loc}${path}`,
+      languages: { en: `/en${path}`, ar: `/ar${path}`, "x-default": `/en${path}` },
+    },
+    openGraph: {
+      type: "website",
+      siteName: "Axon Syria",
+      title: `${titleWithSector} | Axon Syria`,
+      description,
+      url: `${SITE_URL}/${loc}${path}`,
+      locale: loc === "ar" ? "ar_SY" : "en_GB",
+      alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
+    },
   };
 }
 
@@ -57,8 +95,52 @@ export default async function CompanyPage({
   // Per-company accent colour (subtle theming); falls back to the Axon red.
   const accentStyle = profile ? ({ "--accent": profile.accent } as CSSProperties) : undefined;
 
+  const meta = companyMeta[idx];
+  // Per-company Organization structured data — tells search engines this page
+  // *is* the company named here, so a search for the company name resolves to it.
+  const orgLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: card.name,
+    ...(profile ? { alternateName: [profile.name.en, profile.name.ar] } : {}),
+    url: `${SITE_URL}/${lang}/companies/${slug}`,
+    ...(profile?.logo ? { logo: `${SITE_URL}${profile.logo}` } : {}),
+    description: buildDescription(lang, card.name, tagline, services.map((s) => (lang === "ar" ? s.ar : s.en))),
+    areaServed: "SY",
+    ...(profile?.address
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            ...(profile.address.street ? { streetAddress: profile.address.street } : {}),
+            addressLocality: profile.address.locality,
+            addressCountry: "SY",
+          },
+        }
+      : {}),
+    ...(profile?.contact?.email ? { email: profile.contact.email } : {}),
+    ...(profile?.contact?.phone ? { telephone: profile.contact.phone.replace(/\s+/g, "") } : {}),
+    parentOrganization: { "@type": "Organization", name: "Axon Syria", url: `${SITE_URL}/` },
+    ...(services.length
+      ? {
+          makesOffer: services.map((s) => ({
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: lang === "ar" ? s.ar : s.en,
+              description: lang === "ar" ? s.arDesc : s.enDesc,
+            },
+          })),
+        }
+      : {}),
+    ...(meta.website ? { sameAs: [meta.website] } : {}),
+  };
+
   return (
     <div className="company-detail" style={accentStyle}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
+      />
       <section className="page-hero">
         <div className="container page-hero__inner">
           <div className="crumbs">

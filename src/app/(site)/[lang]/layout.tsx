@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ScrollFx from "@/components/ScrollFx";
 import { getDictionary } from "@/i18n/dictionaries";
 import { locales, isLocale, dir } from "@/i18n/config";
+import { SITE_URL } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,21 +41,21 @@ export async function generateMetadata({
   const loc = isLocale(lang) ? lang : "en";
   const dict = getDictionary(loc);
   return {
-    // NOTE: placeholder domain — update once the production domain is registered.
-    metadataBase: new URL("https://axonsyria.com"),
+    metadataBase: new URL(SITE_URL),
     title: { default: dict.meta.title, template: "%s | Axon Syria" },
     description: dict.meta.description,
     alternates: {
       canonical: `/${loc}`,
-      languages: { en: "/en", ar: "/ar" },
+      languages: { en: "/en", ar: "/ar", "x-default": "/en" },
     },
     openGraph: {
       type: "website",
       siteName: "Axon Syria",
       title: dict.meta.title,
       description: dict.meta.description,
-      url: `https://axonsyria.com/${loc}`,
-      locale: loc === "ar" ? "ar_SY" : "en_US",
+      url: `${SITE_URL}/${loc}`,
+      locale: loc === "ar" ? "ar_SY" : "en_GB",
+      alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
     },
     twitter: { card: "summary" },
     icons: { icon: "/favicon.svg" },
@@ -65,8 +66,8 @@ const orgSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Axon Syria",
-  url: "https://axonsyria.com/",
-  logo: "https://axonsyria.com/favicon.svg",
+  url: `${SITE_URL}/en`,
+  logo: `${SITE_URL}/favicon.svg`,
   address: {
     "@type": "PostalAddress",
     streetAddress: "Al Shaikh Najar, Second Industrial Area",
@@ -89,11 +90,11 @@ const orgSchema = {
     url: "https://axongroup.ae/",
   },
   subOrganization: [
-    { "@type": "Organization", name: "Axon Contracting", url: "https://axonsyria.com/en/companies/axon-contracting" },
-    { "@type": "Organization", name: "Axon for Industry & Trade", url: "https://axonsyria.com/en/companies/axon-industry-trade" },
-    { "@type": "Organization", name: "Axon Integrated Facilities Services", url: "https://axonsyria.com/en/companies/axon-integrated-facilities" },
-    { "@type": "Organization", name: "Axon Landscape", url: "https://axonsyria.com/en/companies/axon-landscape" },
-    { "@type": "Organization", name: "Imdad", url: "https://imdadgroup.com/" },
+    { "@type": "Organization", name: "Axon Contracting", url: `${SITE_URL}/en/companies/axon-contracting` },
+    { "@type": "Organization", name: "Axon for Industry & Trade", url: `${SITE_URL}/en/companies/axon-industry-trade` },
+    { "@type": "Organization", name: "Axon Integrated Facilities Services", url: `${SITE_URL}/en/companies/axon-integrated-facilities` },
+    { "@type": "Organization", name: "Axon Landscape", url: `${SITE_URL}/en/companies/axon-landscape` },
+    { "@type": "Organization", name: "Imdad", url: `${SITE_URL}/en/companies/imdad`, sameAs: ["https://imdadgroup.com/"] },
   ],
 };
 

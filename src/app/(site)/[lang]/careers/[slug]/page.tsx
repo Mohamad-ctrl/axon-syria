@@ -5,6 +5,7 @@ import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getJobBySlug } from "@/lib/jobs";
 import ApplicationForm from "@/components/careers/ApplicationForm";
+import { SITE_URL } from "@/lib/site";
 import { MapPin, Clock } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +20,23 @@ export async function generateMetadata({
   const dict = getDictionary(loc);
   const job = await getJobBySlug(slug);
   if (!job) return { title: dict.careers.notFound };
+  const desc = job.description[loc]?.[0] ?? job.title[loc];
   return {
     title: `${job.title[loc]} — ${job.company[loc]}`,
-    description: job.description[loc]?.[0] ?? job.title[loc],
-    alternates: { canonical: `/${loc}/careers/${job.slug}` },
+    description: desc,
+    alternates: {
+      canonical: `/${loc}/careers/${job.slug}`,
+      languages: { en: `/en/careers/${job.slug}`, ar: `/ar/careers/${job.slug}`, "x-default": `/en/careers/${job.slug}` },
+    },
+    openGraph: {
+      type: "article",
+      siteName: "Axon Syria",
+      title: `${job.title[loc]} — ${job.company[loc]}`,
+      description: desc,
+      url: `${SITE_URL}/${loc}/careers/${job.slug}`,
+      locale: loc === "ar" ? "ar_SY" : "en_GB",
+      alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
+    },
   };
 }
 
@@ -43,8 +57,27 @@ export default async function JobPage({
     { day: "numeric", month: "long", year: "numeric" }
   );
 
+  // JobPosting structured data so live roles are eligible for Google Jobs.
+  const jobLd = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: job.title[lang],
+    description: [...job.description[lang], ...job.requirements[lang]].join(" "),
+    datePosted: new Date(job.posted).toISOString(),
+    employmentType: /part/i.test(job.type.en) ? "PART_TIME" : "FULL_TIME",
+    hiringOrganization: { "@type": "Organization", name: job.company[lang], sameAs: SITE_URL },
+    jobLocation: {
+      "@type": "Place",
+      address: { "@type": "PostalAddress", addressLocality: job.location[lang], addressCountry: "SY" },
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jobLd) }}
+      />
       <section className="page-hero">
         <div className="container page-hero__inner">
           <div className="crumbs">

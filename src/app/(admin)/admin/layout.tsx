@@ -10,7 +10,8 @@ const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["700", "800"], 
 export const metadata: Metadata = {
   title: "Axon Admin",
   robots: { index: false, follow: false },
-  icons: { icon: "/images/logo/favicon.png" },
+  // Match the public site's favicon (the Axon Syria mark in /public/favicon.svg).
+  icons: { icon: "/favicon.svg" },
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

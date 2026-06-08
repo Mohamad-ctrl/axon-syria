@@ -149,7 +149,7 @@ const en = {
     location: "Aleppo, Syria",
   },
   careers: {
-    metaTitle: "Careers",
+    metaTitle: "Jobs & Careers in Syria",
     metaDescription:
       "Join Axon Syria — explore open roles across contracting, industry and trade, facilities services, landscaping and metal construction in Syria.",
     crumbHome: "Home",

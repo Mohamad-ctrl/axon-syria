@@ -28,6 +28,9 @@ export type CompanyProfile = {
   /** logo is light/white → show it on a dark accent plate, and fall back to the
    *  wordmark in the (white) header. */
   logoOnDark?: boolean;
+  /** Real postal address — set only where a verified address exists (Imdad).
+   *  The newly-registered Axon companies omit it and rely on areaServed: SY. */
+  address?: { street?: string; locality: string };
   services: ProfileService[];
   contact?: CompanyContact;
 };
@@ -108,6 +111,7 @@ export const companyProfiles: Record<string, CompanyProfile> = {
     logo: "/images/companies/imdad-logo.png",
     logoW: 91,
     logoH: 70,
+    address: { street: "Al Shaikh Najar, Second Industrial Area", locality: "Aleppo" },
     contact: { phone: "+963 21 473 1300", email: "info@imdadgroup.com" },
     services: [
       { en: "Cold Roll-Formed Steel", ar: "حديد التشكيل على البارد", enDesc: "Cold roll-forming and steel shaping, with metal structures designed and fabricated to European engineering standards for industrial and commercial projects.", arDesc: "تشكيل الحديد على البارد وتشكيل الفولاذ، مع هياكل معدنية مصمّمة ومصنّعة وفق المعايير الهندسية الأوروبية للمشاريع الصناعية والتجارية." },
