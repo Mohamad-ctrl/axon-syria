@@ -362,6 +362,11 @@ const profileSections: Section[] = companyMeta.map(({ slug }): Section => {
       fields: [
         t("name", "Display name"),
         t("tagline", "Tagline"),
+        area(
+          "about",
+          "Company description",
+          "The Overview text shown on this company's page. Separate paragraphs with a blank line.",
+        ),
         { type: "color", key: "accent", label: "Accent colour" },
         { type: "image", key: "logo", label: "Logo", folder: `companies/${slug}`, hint: "Transparent PNG works best." },
         { type: "tel", key: "contactPhone", label: "Contact phone", hint: "Optional. Leave blank to use the group contact." },
@@ -501,10 +506,17 @@ export function dictOverrideFromLogical(shape: Shape, logical: unknown): Record<
 
 /* ----- profile store ----- */
 
-export function profileToLogical(profile: CompanyProfile | undefined): Record<string, unknown> {
+export function profileToLogical(
+  profile: CompanyProfile | undefined,
+  /** Default Overview text (from the dictionary card) used to prefill the
+   *  description field when the profile has no `about` override yet. */
+  fallbackAbout?: { en: string; ar: string; tr: string },
+): Record<string, unknown> {
+  const emptyTri = { en: "", ar: "", tr: "" };
   return {
-    name: profile?.name ?? { en: "", ar: "", tr: "" },
-    tagline: profile?.tagline ?? { en: "", ar: "", tr: "" },
+    name: profile?.name ?? { ...emptyTri },
+    tagline: profile?.tagline ?? { ...emptyTri },
+    about: profile?.about ?? fallbackAbout ?? { ...emptyTri },
     accent: profile?.accent ?? "#3D55E0",
     logo: profile?.logo ?? "",
     contactPhone: profile?.contact?.phone ?? "",
@@ -519,6 +531,7 @@ export function profileFromLogical(logical: unknown): Partial<CompanyProfile> {
   const phone = str(l.contactPhone).trim();
   const email = str(l.contactEmail).trim();
   const tri = (v: unknown) => ({ en: str(asObject(v).en), ar: str(asObject(v).ar), tr: str(asObject(v).tr) });
+  const about = tri(l.about);
   const out: Partial<CompanyProfile> = {
     name: tri(l.name),
     tagline: tri(l.tagline),
@@ -526,7 +539,9 @@ export function profileFromLogical(logical: unknown): Partial<CompanyProfile> {
     logo: str(l.logo) || undefined,
     services: asArray(l.services).map((s) => ({ name: tri(asObject(s).name), desc: tri(asObject(s).desc) })),
   };
-  if (phone || email) out.contact = { ...(phone ? { phone } : {}), ...(email ? { email } : {}) };
+  // Only store a description override when something was entered; otherwise the
+  // detail page keeps falling back to the dictionary card's default Overview.
+  if (about.en || about.ar || about.tr) out.about = about;
   return out;
 }
 

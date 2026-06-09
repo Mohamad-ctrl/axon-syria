@@ -13,6 +13,7 @@ import {
   getFeaturedProjects,
   getCompanyCertificates,
 } from "@/lib/content";
+import { companyMeta } from "@/data/companies";
 import ContentEditor from "../ContentEditor";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +37,25 @@ export default async function ContentSectionPage({
     const rk = section.store.rootKey as keyof typeof en;
     value = dictToLogical(section.shape, en[rk], ar[rk], tr[rk]);
   } else if (section.store.kind === "profile") {
-    value = profileToLogical(await getCompanyProfile(section.store.slug));
+    const slug = section.store.slug;
+    const [profile, en, ar, tr] = await Promise.all([
+      getCompanyProfile(slug),
+      getDictionary("en"),
+      getDictionary("ar"),
+      getDictionary("tr"),
+    ]);
+    // Prefill the description field with the current default Overview text
+    // (the dictionary card) when the profile has no `about` override yet.
+    const idx = companyMeta.findIndex((m) => m.slug === slug);
+    const fallbackAbout =
+      idx >= 0
+        ? {
+            en: en.companies.cards[idx]?.about ?? "",
+            ar: ar.companies.cards[idx]?.about ?? "",
+            tr: tr.companies.cards[idx]?.about ?? "",
+          }
+        : undefined;
+    value = profileToLogical(profile, fallbackAbout);
   } else if (section.store.kind === "projects") {
     value = projectsToLogical(await getFeaturedProjects());
   } else {

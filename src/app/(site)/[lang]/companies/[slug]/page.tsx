@@ -94,6 +94,9 @@ export default async function CompanyPage({
   const projects = companyProjects[slug] ?? [];
   const services = profile?.services ?? [];
   const tagline = profile ? profile.tagline[lang] : card.desc;
+  // Overview text: the admin-editable per-company description if set, otherwise
+  // the default from the dictionary card.
+  const overview = profile?.about?.[lang] || card.about;
 
   // Per-company accent colour (subtle theming); falls back to the Axon red.
   const accentStyle = profile ? ({ "--accent": profile.accent } as CSSProperties) : undefined;
@@ -175,7 +178,7 @@ export default async function CompanyPage({
             )}
             <p className="eyebrow">{cd.overviewEyebrow}</p>
             <div className="prose" style={{ marginTop: ".6rem" }}>
-              {card.about.split("\n\n").map((para) => (
+              {overview.split("\n\n").map((para) => (
                 <p key={para.slice(0, 32)}>{para}</p>
               ))}
             </div>

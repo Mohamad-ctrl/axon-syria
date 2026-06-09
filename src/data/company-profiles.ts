@@ -32,6 +32,10 @@ export type CompanyProfile = {
   accent: string;
   name: Bilingual;
   tagline: Bilingual;
+  /** Optional admin-editable Overview text for the company detail page.
+   *  When unset, the page falls back to the dictionary card's `about`
+   *  (`dict.companies.cards[idx].about`), which stays the default source. */
+  about?: Bilingual;
   logo?: string;
   logoW?: number;
   logoH?: number;
