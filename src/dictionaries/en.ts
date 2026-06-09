@@ -1,8 +1,8 @@
 const en = {
   meta: {
-    title: "Axon Syria — Building Syria's Future",
+    title: "Axon Syria: Building Syria's Future",
     description:
-      "Axon Syria: an independent Syrian group of five companies in contracting, industry and trade, integrated facilities, landscape and metal construction, supported by Axon Group in the UAE.",
+      "Axon Syria is an independent Syrian group of five companies working in contracting, industry and trade, integrated facilities, landscape and metal construction, supported by Axon Group in the UAE.",
   },
   nav: {
     skip: "Skip to content",
@@ -20,7 +20,7 @@ const en = {
     eyebrow: "Supported by Axon Group UAE",
     title: "Building and rebuilding Syria, together.",
     subtitle:
-      "Five specialised companies across contracting, industry and trade, integrated facilities, landscape and metal construction. One integrated capability for Syria's reconstruction, drawing on the expertise and standards of Axon Group in the UAE.",
+      "Five specialised companies covering contracting, industry and trade, integrated facilities, landscape and metal construction. Together they give Syria's reconstruction one integrated capability, drawing on the expertise and standards of Axon Group in the UAE.",
     ctaPrimary: "Explore our companies",
     ctaSecondary: "Talk to us",
   },
@@ -33,18 +33,18 @@ const en = {
   about: {
     eyebrow: "Who we are",
     title: "A new Syrian group with proven foundations.",
-    lead: "Axon Syria is an independent, newly formed Syrian group of five specialised companies spanning contracting, industry and trade, integrated facilities, landscape and metal construction. Together they form one integrated capability for reconstruction and development, anchored by Imdad's established factory in Aleppo and supported by the experience and standards of Axon Group in the UAE.",
+    lead: "Axon Syria is an independent, newly formed Syrian group of five specialised companies in contracting, industry and trade, integrated facilities, landscape and metal construction. Together they make up one integrated capability for reconstruction and development, anchored by Imdad's established factory in Aleppo and supported by the experience and standards of Axon Group in the UAE.",
     points: [
-      { t: "Integrated across the lifecycle.", d: "From contracting and industry to facilities and landscape, our companies cover the full project lifecycle under one group." },
-      { t: "UAE-proven systems.", d: "We work to management systems and ISO-grade quality and HSE standards adopted from Axon Group UAE's operations." },
-      { t: "Committed to Syria.", d: "We are here to take part in Syria's reconstruction and development, delivered on the ground by local teams." },
+      { t: "Integrated across the lifecycle.", d: "Contracting, industry, facilities and landscape sit under one group, so our companies cover a project's full lifecycle." },
+      { t: "UAE-proven systems.", d: "We run to management systems and ISO-grade quality and HSE standards adopted from Axon Group UAE's operations." },
+      { t: "Committed to Syria.", d: "We are here to take part in Syria's reconstruction and development, with the work done on the ground by local teams." },
     ],
     cta: "Get in touch",
   },
   companies: {
     eyebrow: "Our companies",
     title: "Five companies, one integrated group.",
-    lead: "Each company is the specialist in its field — contracting, industry and trade, facilities, landscape and metal construction — and all share one group and one standard. Explore the five.",
+    lead: "Each company is the specialist in its own field, from contracting, industry and trade to facilities, landscape and metal construction, and all five share one group and one standard. Take a look.",
     visit: "Visit website",
     learnMore: "Learn more",
     contact: "Get in touch",
@@ -52,41 +52,41 @@ const en = {
       {
         tag: "Contracting",
         name: "Axon Contracting",
-        desc: "Civil construction for Syria: buildings, roads, bridges and heritage restoration, plus a building-materials supply arm, supported by Axon Group UAE's expertise.",
+        desc: "Civil construction across Syria, covering buildings, roads, bridges and heritage restoration, with a building-materials supply arm and the expertise of Axon Group UAE behind it through its support.",
         about:
-          "Axon Contracting is the group's general civil construction arm in Syria. The company builds residential and non-residential buildings, lays roads, streets and pedestrian networks, and constructs bridges and elevated highways, along with water pipelines within and between cities. It restores and rehabilitates buildings, including heritage sites that carry the country's history, and handles demolition, debris removal and finishing trades through to handover. A dedicated trading arm supplies and imports building materials, from cement and steel to marble, ceramics and machinery.\n\nThe company is new, but it does not start from zero. Axon Contracting is an independent Syrian company supported by Axon Group UAE, an Abu Dhabi group of seven companies with more than 20 years of construction and contracting experience. That support brings trained teams, proven management systems, ISO-grade quality and HSE standards, and strong procurement channels to every project. The result is a Syrian contractor ready to take part in the country's reconstruction with international-standard delivery.",
+          "Axon Contracting is the group's general civil construction arm in Syria. It builds residential and non-residential buildings, lays roads, streets and pedestrian networks, and constructs bridges and elevated highways along with water pipelines that run within cities and between them. The company restores and rehabilitates buildings, including heritage sites that hold the country's history, and takes care of demolition, debris removal and the finishing trades right through to handover. A dedicated trading arm supplies and imports building materials, covering cement, steel, marble, ceramics and machinery.\n\nThe company is new, but it isn't starting from zero. Axon Contracting is an independent Syrian company supported by Axon Group UAE, an Abu Dhabi group of seven companies with more than 20 years in construction and contracting. That support puts trained teams, proven management systems, ISO-grade quality and HSE standards, and strong procurement channels behind every project. What you get is a Syrian contractor ready to play its part in the country's reconstruction, delivering to international standards.",
         alt: "Axon Contracting logo",
       },
       {
         tag: "Industry & Trade",
         name: "Axon for Industry & Trade",
-        desc: "Fabricated steel structures, hangars and flagpoles, plus industrial equipment supply, import and export, and commercial representation for local and foreign manufacturers.",
+        desc: "Fabricated steel structures, hangars and flagpoles, with industrial equipment supply, import and export, and commercial representation for local and foreign manufacturers.",
         about:
-          "Axon for Industry & Trade is the group's manufacturing and trading arm in Syria. It fabricates steel and metal structures — hangars, industrial sheds, flagpoles and similar fabricated steel products — and supplies the industrial equipment that factories, contractors and developers depend on. Alongside fabrication, the company imports and exports materials and acts as a commercial agent for local and foreign manufacturers, giving Syrian clients a single, reliable channel to specialised products and equipment.\n\nEvery structure is engineered to specification, fabricated to defined tolerances and finished for the conditions it will face. As part of the independent Axon Syria group, the company is supported by Axon Group UAE, an Abu Dhabi group of seven companies with more than twenty years in steel and civil contracting. That support brings proven management systems, ISO-grade quality and HSE standards, and strong procurement channels — so material, capability and oversight are in place from day one as Syria rebuilds.",
+          "Axon for Industry & Trade is the group's manufacturing and trading arm in Syria. The company fabricates steel and metal structures, hangars, industrial sheds, flagpoles and similar fabricated steel products, and supplies the industrial equipment that factories, contractors and developers rely on. It also imports and exports materials and works as a commercial agent for local and foreign manufacturers, which gives Syrian clients one reliable channel to specialised products and equipment.\n\nEach structure is engineered to specification, fabricated to defined tolerances and finished for the conditions it will meet. The company belongs to the independent Axon Syria group and is supported by Axon Group UAE, an Abu Dhabi group of seven companies with more than twenty years in steel and civil contracting. That support brings proven management systems, ISO-grade quality and HSE standards, and strong procurement channels, so material, capability and oversight are in place from day one as Syria rebuilds.",
         alt: "Axon for Industry & Trade logo",
       },
       {
         tag: "Facilities Services",
         name: "Axon Integrated Facilities Services",
-        desc: "MEP, solar, water and sewage networks, waste and recycling, environmental remediation and fit-out, run by one team to keep facilities and infrastructure working.",
+        desc: "MEP, solar power, water and sewage networks, waste and recycling, environmental remediation and fit-out, handled by one team so facilities and infrastructure keep working.",
         about:
-          "Axon Integrated Facilities Services is the group's utilities and facility-management arm in Syria. It covers the technical work that keeps buildings, sites and public infrastructure functioning: mechanical, electrical and plumbing systems, HVAC, heating and solar power; the operation, cleaning and insulation of water and sewage networks; waste collection and recycling; environmental remediation and site decontamination; and a full range of fit-out and finishing trades, from ceilings and partitions to tiling, gypsum and painting. Clients span developers, contractors, industrial operators and public bodies.\n\nThe company runs to defined standards and proper documentation, with technicians trained for each discipline. It is supported by Axon Group UAE, an Abu Dhabi group of seven companies with more than 20 years in facility management and the same fields. That support brings proven management systems, ISO-grade quality and HSE practice, trained crews and strong procurement channels, applied to Syria's reconstruction and the long-term upkeep that follows it.",
+          "Axon Integrated Facilities Services is the group's utilities and facility-management arm in Syria. The company handles the technical work that keeps buildings, sites and public infrastructure functioning. That covers mechanical, electrical and plumbing systems, HVAC, heating and solar power. It also takes on the operation, cleaning and insulation of water and sewage networks, waste collection and recycling, environmental remediation and site decontamination, and a full range of fit-out and finishing trades that runs from ceilings and partitions to tiling, gypsum and painting. Clients include developers, contractors, industrial operators and public bodies.\n\nThe company works to defined standards with proper documentation, and its technicians are trained for each discipline. It is supported by Axon Group UAE, an Abu Dhabi group of seven companies with more than 20 years in facility management and the same fields. That support brings proven management systems, ISO-grade quality and HSE practice, trained crews and strong procurement channels, applied to Syria's reconstruction and the long-term upkeep that follows.",
         alt: "Axon Integrated Facilities Services logo",
       },
       {
         tag: "Landscaping",
         name: "Axon Landscape",
-        desc: "Landscape design and execution, garden upkeep, nurseries, irrigation and sports turf, bringing green spaces to life across Syria and keeping them that way.",
+        desc: "Landscape design and execution, garden upkeep, nurseries, irrigation and sports turf. We bring green spaces to life across Syria and keep them that way.",
         about:
-          "Axon Landscape is the group's green arm in Syria, designing, planting and maintaining the outdoor spaces around homes, developments, institutions and public projects. The work runs from full landscape design and execution, including green roofs and planted building facades, to garden maintenance, ornamental planting and natural-grass sports pitches. An in-house nursery raises seedlings and ornamental plants, while dedicated teams handle irrigation systems, greenhouses, agricultural supplies and pest control, so a site stays cared for long after the first planting.\n\nEvery project follows a clear plan: prepare the ground properly, plant for the local climate, and put irrigation and upkeep in place to keep it thriving. Axon Landscape is supported by the companies of Axon Group in the UAE, which bring more than twenty years of landscaping experience, trained crews and proven management and quality standards. That support gives Syrian clients work designed to take root and last, delivered to standards already tested across the UAE.",
+          "Axon Landscape is the group's green arm in Syria. It designs, plants and maintains the outdoor spaces around homes, developments, institutions and public projects. The work covers full landscape design and execution, with green roofs and planted building facades part of what the company offers, and it carries through to garden maintenance, ornamental planting and natural-grass sports pitches. An in-house nursery raises seedlings and ornamental plants. Dedicated teams look after irrigation systems, greenhouses, agricultural supplies and pest control, so a site stays cared for long after the first planting goes in.\n\nEvery project follows a clear plan. The ground is prepared properly, the planting is chosen to suit the local climate, and irrigation and upkeep are put in place to keep it thriving. Axon Landscape is supported by the companies of Axon Group in the UAE, which bring more than twenty years of landscaping experience, trained crews, and proven management and quality standards. For Syrian clients, that means work designed to take root and last, delivered to standards already tested across the UAE.",
         alt: "Axon Landscape logo",
       },
       {
         tag: "Metal Construction",
         name: "Imdad",
-        desc: "An established Aleppo steel manufacturer making prefabricated buildings, metal structures, cladding and fit-out for reconstruction projects across Syria.",
+        desc: "A long-established Aleppo steel manufacturer producing prefabricated buildings, metal structures, cladding and fit-out for reconstruction work across Syria.",
         about:
-          "Imdad is an established metal-construction manufacturer based in Aleppo's Second Industrial Area, with its own factory and a track record across the residential, commercial, industrial and agricultural sectors. The company works in metal installations of every kind — cold roll-formed steel, prefabricated buildings, metal structures and warehouses, cladding and fit-out, aluminium and glass facades, scaffolding and more — designing steel structures to European standards for projects tied to Syria's reconstruction.\n\nThe name itself means \"supply\" in Arabic, and that is the role Imdad plays: the industrial backbone of the new Axon Syria group. Its work is certified to ISO 9001, ISO 14001 and ISO 45001 for quality, environment and safety. Anchoring the group with a working plant and proven delivery, Imdad works with the support of the companies of Axon Group in the UAE, drawing on their management systems, trained teams and procurement strength to scale up for the rebuild ahead.",
+          "Imdad is a long-established metal-construction manufacturer in Aleppo's Second Industrial Area, running its own factory with a record of work across the residential, commercial, industrial and agricultural sectors. Its range covers metal installations of nearly every kind: cold roll-formed steel, prefabricated buildings, metal structures and warehouses, cladding and fit-out, aluminium and glass facades, scaffolding and more. The steel structures it designs are engineered to European standards for projects tied to Syria's reconstruction.\n\nThe name means \"supply\" in Arabic, and that is exactly the role Imdad plays as the industrial backbone of the new Axon Syria group. Its work is certified to ISO 9001, ISO 14001 and ISO 45001 for quality, environment and safety. With a working plant and a proven delivery record anchoring the group, Imdad operates with the support of the companies of Axon Group in the UAE, drawing on their management systems, trained teams and procurement strength to scale up for the rebuild ahead.",
         alt: "Imdad metal-construction company logo",
       },
     ],
@@ -105,34 +105,39 @@ const en = {
       "The accreditations and licences this company holds. Click any certificate to open the full document.",
     projectsEyebrow: "Selected work",
     projectsTitle: "Projects",
-    projectsLead: "A selection of projects delivered for our clients.",
+    projectsLead: "A selection of the projects we have delivered for our clients.",
     projectTitlePlaceholder: "Project title goes here",
     projectDescPlaceholder: "One line on the client, scope and outcome.",
     contactEyebrow: "Get in touch",
     contactTitle: "Let's talk about your project.",
-    contactText: "Reach the team directly, or send a message and we'll route it to the right people.",
+    contactText: "Reach the team directly, or send a message and we'll get it to the right people.",
     contactCta: "Get in touch",
+  },
+  projects: {
+    eyebrow: "Selected work",
+    title: "Projects we've delivered",
+    lead: "A selection of the work our companies have delivered on the ground in Syria.",
   },
   why: {
     eyebrow: "Why Axon Syria",
     title: "What the group brings to Syria.",
     features: [
-      { title: "Support from an established UAE group", desc: "We draw on Axon Group in the UAE for transfer of expertise and trained teams, so projects start with proven know-how behind them." },
-      { title: "One integrated partner", desc: "From build to operate, five companies under one group mean a single point of contact instead of a string of separate suppliers." },
-      { title: "Quality and safety, proven abroad", desc: "Our quality and HSE standards are adopted from Axon Group UAE's ISO-certified operations and applied on every job." },
-      { title: "Real industrial capacity in Aleppo", desc: "Through Imdad's established factory in Aleppo, the group brings genuine local presence and proven metal-construction manufacturing." },
+      { title: "Support from an established UAE group", desc: "We draw on Axon Group in the UAE for transfer of expertise and trained teams, so projects begin with proven know-how behind them." },
+      { title: "One integrated partner", desc: "Five companies under one group, from build through operate, give you a single point of contact rather than a string of separate suppliers." },
+      { title: "Quality and safety, proven abroad", desc: "Our quality and HSE standards come from Axon Group UAE's ISO-certified operations, and we apply them on every job." },
+      { title: "Real industrial capacity in Aleppo", desc: "Imdad's established factory in Aleppo gives the group genuine local presence and proven metal-construction manufacturing." },
     ],
   },
   uae: {
     eyebrow: "Our supporters",
     title: "Supported by Axon Group UAE",
-    text: "Axon Group is an Abu Dhabi–based group of seven companies — landscaping, facility management, swimming pools, garments, steel and civil contracting, waste management and integrated amenities — with more than 20 years of operations, over 100 clients and more than 500 projects delivered in the UAE. Axon Syria is an independent Syrian group: it is supported by Axon Group UAE, not part of it. The Syrian companies draw on its expertise, management systems, quality standards and procurement network.",
+    text: "Axon Group is an Abu Dhabi-based group of seven companies working in landscaping, facility management, swimming pools, garments, steel and civil contracting, waste management and integrated amenities. It has more than 20 years of operations, over 100 clients and more than 500 projects delivered in the UAE. Axon Syria is an independent Syrian group. It is supported by Axon Group UAE, not part of it, and the Syrian companies draw on its expertise, management systems, quality standards and procurement network.",
     panelTitle: "The seven UAE companies",
     cta: "Visit Axon Group UAE",
   },
   cta: {
     title: "Have a project in Syria? Let's talk.",
-    text: "Whether you are planning a build, an industrial supply, a facilities contract or a landscape, tell us about it and we will connect you with the right company in the group. One message is enough to start.",
+    text: "A build, an industrial supply, a facilities contract, a landscape: tell us what you have in mind and we'll connect you with the right company in the group. One message is enough to get started.",
     email: "Email us",
   },
   footer: {
@@ -151,21 +156,21 @@ const en = {
   careers: {
     metaTitle: "Jobs & Careers in Syria",
     metaDescription:
-      "Join Axon Syria — explore open roles across contracting, industry and trade, facilities services, landscaping and metal construction in Syria.",
+      "Join Axon Syria. Explore open roles in contracting, industry and trade, facilities services, landscaping and metal construction across Syria.",
     crumbHome: "Home",
     crumbCareers: "Careers",
     eyebrow: "Careers",
     title: "Build your career with Axon Syria.",
     intro:
-      "Join a multidisciplinary group taking part in Syria's reconstruction and development. Whether you build, maintain, design or sell, there's a place for you at Axon.",
+      "Join a multidisciplinary group taking part in Syria's reconstruction and development. If you build, maintain, design or sell, there's a place for you at Axon.",
     viewRoles: "View open roles",
     whyEyebrow: "Why Axon",
     whyTitle: "Why work with us",
     values: [
-      { title: "Grow with us", desc: "Develop your career across a group of companies with real opportunities to advance." },
+      { title: "Grow with us", desc: "Build your career across a group of companies, with real room to advance." },
       { title: "Great teams", desc: "Work alongside experienced engineers, technicians and specialists who take pride in their craft." },
       { title: "Stability & safety", desc: "An independent group supported by Axon Group UAE's established companies, with ISO-grade processes and a strong commitment to HSE." },
-      { title: "Meaningful work", desc: "From construction sites to nurseries to the factory floor, you'll help rebuild the country, project by project." },
+      { title: "Meaningful work", desc: "On construction sites, in nurseries and on the factory floor, you'll help rebuild the country project by project." },
     ],
     openEyebrow: "Open positions",
     openTitle: "Current openings",
@@ -173,7 +178,7 @@ const en = {
     filterAll: "All",
     filterAria: "Filter roles by department",
     viewApply: "View & apply",
-    emptyPrefix: "No openings in this category right now. Check back soon — or send your CV to ",
+    emptyPrefix: "No openings in this category right now. Check back soon, or send your CV to ",
     responsibilities: "Responsibilities",
     requirements: "Requirements",
     detailCompany: "Company",

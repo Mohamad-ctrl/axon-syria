@@ -20,10 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const languages = {
       en: `${SITE_URL}/en${path}`,
       ar: `${SITE_URL}/ar${path}`,
+      tr: `${SITE_URL}/tr${path}`,
       "x-default": `${SITE_URL}/en${path}`,
     };
     const priority = path === "" ? 1 : path.startsWith("/companies") ? 0.9 : 0.7;
-    return (["en", "ar"] as const).map((loc) => ({
+    return (["en", "ar", "tr"] as const).map((loc) => ({
       url: `${SITE_URL}/${loc}${path}`,
       lastModified,
       changeFrequency: "monthly" as const,

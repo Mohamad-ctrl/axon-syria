@@ -26,6 +26,7 @@ $env:Path = "C:\Users\User\nodejs;$env:Path"
 
 - `npm run dev` — dev server (Turbopack, port 3000).
 - `npm run build` — production build; runs TypeScript **and** ESLint. This is the primary verification gate — **there is no test suite**; a green build plus manual checks against the dev server is how changes are verified.
+- **Deploy:** pushing to `main` (repo `Mohamad-ctrl/axon-syria`) auto-deploys to Vercel; the site is **live at `https://axon-sy.com`** (apex + `www`).
 - **Build gotcha:** after adding/moving/deleting a route, the `.next` type cache can go stale (`Cannot find module '.../route.js'`). Fix: delete `.next` and rebuild. Don't run `next build` while the dev server is running (both contend over `.next`).
 
 ## Architecture
@@ -41,9 +42,10 @@ $env:Path = "C:\Users\User\nodejs;$env:Path"
 - All user-facing text comes from the dictionaries or the bilingual data files — never hardcode strings in components.
 - `dict.stats` is an **array** of `{value, label}` (differs from the UAE site's object shape).
 - RTL: `dir="rtl"` + overrides in the `Arabic / RTL` section of `globals.css`. Directional arrows mirror via the `.icon-arrow` class set in `icons.tsx`.
+- The topbar EN/ع switch is hidden below 720px, so a second language switch renders inside the mobile nav drawer (`.nav__lang` in `Header.tsx` + `globals.css`).
 
 ### The five companies — three index-aligned places
-`src/data/companies.ts` (`companyMeta`: 5 slugs — axon-contracting, axon-industry-trade, axon-integrated-facilities, axon-landscape, imdad) is **index-aligned** with `dict.companies.cards` in **both** `en.ts` and `ar.ts`; `src/data/company-profiles.ts` (accent, logo + dims, tagline, services, contact) is keyed by slug. Adding/reordering a company means touching all four in the same positions. Detail pages prerender via `generateStaticParams` over `companyMeta`.
+`src/data/companies.ts` (`companyMeta`: 5 slugs — axon-contracting, axon-industry-trade, axon-integrated-facilities, axon-landscape, imdad) is **index-aligned** with `dict.companies.cards` in **both** `en.ts` and `ar.ts`; `src/data/company-profiles.ts` (accent, logo + dims, tagline, services, contact, optional `address`) is keyed by slug. Adding/reordering a company means touching all four in the same positions. Detail pages prerender via `generateStaticParams` over `companyMeta`.
 
 - Per-company **accent colors** were sampled from the official logos (in `public/images/companies/`). Accent-colored text and primary buttons run through `color-mix(... 70%, var(--ink))` in `globals.css` for WCAG contrast — the orange (industry) and sage (landscape) accents fail on white otherwise.
 - **No photography exists yet**: the hero is a designed CSS gradient, the About section is a logo mosaic, and company cards render logo plates tinted by accent. Drop-in points are documented in README.md.
@@ -59,13 +61,20 @@ One global stylesheet `src/app/globals.css` (no Tailwind/CSS Modules). Brand tok
 - `src/data/jobs.ts` (`seedJobs`) is seed/reference only — the 7 jobs were already inserted into the DB; it is not read at runtime.
 - Admin auth is a signed cookie (`src/lib/admin-auth.ts`); mutations are server actions in `(admin)/admin/actions.ts` that re-check auth and `revalidatePath`. Jobs are authored in English; `src/lib/translate.ts` (Anthropic API) generates the Arabic, falling back to English without `ANTHROPIC_API_KEY`.
 
+### SEO & metadata
+- `src/lib/site.ts` exports `SITE_URL` (from `NEXT_PUBLIC_SITE_URL`, default `https://axon-sy.com`) — the single source for every absolute URL (`metadataBase`, canonical, OG, sitemap, JSON-LD). `layout.tsx` no longer hardcodes a domain.
+- `src/app/sitemap.ts` + `src/app/robots.ts` (file conventions): the sitemap lists every public page in EN + AR with `hreflang` alternates (incl. `x-default`); robots allows crawling, disallows `/admin` + `/api`, and points to the sitemap.
+- Per-page metadata sets canonical + `hreflang` (en/ar/x-default) + OpenGraph. Company pages use **sector-bearing titles** (`name — tag`) and emit a per-company **Organization** JSON-LD (`parentOrganization: Axon Syria`); job pages emit **JobPosting** JSON-LD; the layout emits the group Organization JSON-LD (with Axon UAE as `sponsor`).
+- `src/app/api/og/route.tsx` — a `next/og` branded social card at `/api/og` (lives under `/api` so the locale proxy doesn't redirect it), referenced by `openGraph.images` on every page so link previews (WhatsApp etc.) show the brand. Favicon is `public/favicon.svg` (the default `favicon.ico` was removed).
+- Google Search Console is verified via `verification.google` in the layout metadata + `public/google…html`.
+
 ### Runtime env vars (`.env.local`, git-ignored)
-`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `ANTHROPIC_API_KEY` (optional `ANTHROPIC_MODEL`). Keep secrets out of the repo.
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `ANTHROPIC_API_KEY` (optional `ANTHROPIC_MODEL`). Keep secrets out of the repo. Plus the public, non-secret **`NEXT_PUBLIC_SITE_URL`** (canonical origin for SEO; defaults to `https://axon-sy.com` — see `src/lib/site.ts`).
 
 ## Known placeholders (see README.md for the full list)
-- Domain `https://axonsyria.com` in `layout.tsx` is a placeholder (the real domain may be `axon-sy.com` — the group email is `info@axon-sy.com`; unconfirmed at time of writing).
-- Group phone `+963 21 473 1300` is Imdad's published Aleppo line; footer social links point to `#`.
-- Default admin credentials (`admin`/`admin`) must change before launch.
+- **Live domain is `axon-sy.com`** (apex + `www`), centralized in `src/lib/site.ts` (`SITE_URL`, overridable via `NEXT_PUBLIC_SITE_URL`) — `layout.tsx` no longer hardcodes a domain; Search Console is verified and the sitemap submitted.
+- Group phone `+963 21 473 1300` is Imdad's published Aleppo line; group email is `info@axon-sy.com`; footer social links still point to `#`.
+- Default admin credentials (`admin`/`admin`) must change before launch — set `ADMIN_USERNAME`/`ADMIN_PASSWORD` and a strong `ADMIN_SESSION_SECRET` in Vercel.
 
 ## Source material
 Company scope and the Arabic names come from the licensed-activity Word docs and logos in `../Syria website/`; Imdad's facts come from imdadgroup.com. Don't invent capabilities, years, clients or projects beyond those sources — the four Axon companies are newly registered and have no Syrian track record (Imdad is the only established one).

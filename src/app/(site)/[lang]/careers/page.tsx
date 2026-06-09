@@ -6,7 +6,7 @@ import { getDictionary } from "@/i18n/dictionaries";
 import JobsExplorer from "@/components/careers/JobsExplorer";
 import { getActiveJobs } from "@/lib/jobs";
 import { ArrowRight, Growth, Users, Shield, Sparkle } from "@/components/icons";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export async function generateMetadata({
     description: dict.careers.metaDescription,
     alternates: {
       canonical: `/${loc}/careers`,
-      languages: { en: "/en/careers", ar: "/ar/careers", "x-default": "/en/careers" },
+      languages: langAlternates("/careers"),
     },
     openGraph: {
       type: "website",
@@ -31,8 +31,8 @@ export async function generateMetadata({
       title: `${dict.careers.metaTitle} | Axon Syria`,
       description: dict.careers.metaDescription,
       url: `${SITE_URL}/${loc}/careers`,
-      locale: loc === "ar" ? "ar_SY" : "en_GB",
-      alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
+      locale: ogLocale(loc),
+      alternateLocale: ogAlternateLocales(loc),
       images: [{ url: `${SITE_URL}/api/og`, width: 1200, height: 630, alt: "Axon Syria" }],
     },
   };

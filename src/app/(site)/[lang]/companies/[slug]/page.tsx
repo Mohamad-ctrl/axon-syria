@@ -10,7 +10,7 @@ import { companyProfiles } from "@/data/company-profiles";
 import { companyCertificates, CERT_META } from "@/data/certificates";
 import { companyProjects, PROJECT_CAT } from "@/data/projects";
 import { ArrowRight } from "@/components/icons";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates } from "@/lib/site";
 
 // One static page per company slug, generated for each locale by the parent
 // `[lang]` layout. Content is fully static (dictionaries + data), so prerender it all.
@@ -22,9 +22,9 @@ export function generateStaticParams() {
  *  the Organization JSON-LD so they stay consistent. */
 function buildDescription(loc: string, name: string, tagline: string, serviceNames: string[]): string {
   const svc = serviceNames.slice(0, 3);
-  return loc === "ar"
-    ? `${name} في سوريا${svc.length ? `: ${svc.join("، ")} وغيرها` : ""}. ${tagline} ضمن مجموعة أكسون سوريا.`
-    : `${name} in Syria${svc.length ? ` — ${svc.join(", ")} and more` : ""}. ${tagline} Part of the Axon Syria group.`;
+  if (loc === "ar") return `${name} في سوريا${svc.length ? `: ${svc.join("، ")} وغيرها` : ""}. ${tagline} ضمن مجموعة أكسون سوريا.`;
+  if (loc === "tr") return `${name}, Suriye${svc.length ? `: ${svc.join(", ")} ve daha fazlası` : ""}. ${tagline} Axon Syria grubunun bir parçası.`;
+  return `${name} in Syria${svc.length ? `: ${svc.join(", ")} and more` : ""}. ${tagline} Part of the Axon Syria group.`;
 }
 
 export async function generateMetadata({
@@ -39,13 +39,14 @@ export async function generateMetadata({
   if (idx === -1) return {};
   const card = dict.companies.cards[idx];
   const profile = companyProfiles[slug];
-  const tagline = profile ? (loc === "ar" ? profile.tagline.ar : profile.tagline.en) : card.desc;
+  const tagline = profile ? profile.tagline[loc] : card.desc;
   const services = profile?.services ?? [];
-  const description = buildDescription(loc, card.name, tagline, services.map((s) => (loc === "ar" ? s.ar : s.en)));
+  const description = buildDescription(loc, card.name, tagline, services.map((s) => s.name[loc]));
   const path = `/companies/${slug}`;
   // Title carries the company name + its sector, so it matches "<company> syria"
   // and disambiguates the five Axon-prefixed names (the template adds "| Axon Syria").
-  const titleWithSector = `${card.name} — ${card.tag}`;
+  const titleSep = loc === "ar" ? "، " : ", ";
+  const titleWithSector = `${card.name}${titleSep}${card.tag}`;
   return {
     title: titleWithSector,
     description,
@@ -55,11 +56,11 @@ export async function generateMetadata({
       "Syria",
       "Aleppo",
       "أكسون سوريا",
-      ...services.map((s) => (loc === "ar" ? s.ar : s.en)),
+      ...services.map((s) => s.name[loc]),
     ],
     alternates: {
       canonical: `/${loc}${path}`,
-      languages: { en: `/en${path}`, ar: `/ar${path}`, "x-default": `/en${path}` },
+      languages: langAlternates(path),
     },
     openGraph: {
       type: "website",
@@ -67,8 +68,8 @@ export async function generateMetadata({
       title: `${titleWithSector} | Axon Syria`,
       description,
       url: `${SITE_URL}/${loc}${path}`,
-      locale: loc === "ar" ? "ar_SY" : "en_GB",
-      alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
+      locale: ogLocale(loc),
+      alternateLocale: ogAlternateLocales(loc),
       images: [{ url: `${SITE_URL}/api/og`, width: 1200, height: 630, alt: "Axon Syria" }],
     },
   };
@@ -91,7 +92,7 @@ export default async function CompanyPage({
   const certs = companyCertificates[slug] ?? [];
   const projects = companyProjects[slug] ?? [];
   const services = profile?.services ?? [];
-  const tagline = profile ? (lang === "ar" ? profile.tagline.ar : profile.tagline.en) : card.desc;
+  const tagline = profile ? profile.tagline[lang] : card.desc;
 
   // Per-company accent colour (subtle theming); falls back to the Axon red.
   const accentStyle = profile ? ({ "--accent": profile.accent } as CSSProperties) : undefined;
@@ -103,10 +104,10 @@ export default async function CompanyPage({
     "@context": "https://schema.org",
     "@type": "Organization",
     name: card.name,
-    ...(profile ? { alternateName: [profile.name.en, profile.name.ar] } : {}),
+    ...(profile ? { alternateName: [profile.name.en, profile.name.ar, profile.name.tr] } : {}),
     url: `${SITE_URL}/${lang}/companies/${slug}`,
     ...(profile?.logo ? { logo: `${SITE_URL}${profile.logo}` } : {}),
-    description: buildDescription(lang, card.name, tagline, services.map((s) => (lang === "ar" ? s.ar : s.en))),
+    description: buildDescription(lang, card.name, tagline, services.map((s) => s.name[lang])),
     areaServed: "SY",
     ...(profile?.address
       ? {
@@ -127,8 +128,8 @@ export default async function CompanyPage({
             "@type": "Offer",
             itemOffered: {
               "@type": "Service",
-              name: lang === "ar" ? s.ar : s.en,
-              description: lang === "ar" ? s.arDesc : s.enDesc,
+              name: s.name[lang],
+              description: s.desc[lang],
             },
           })),
         }
@@ -190,10 +191,10 @@ export default async function CompanyPage({
             </div>
             <div className="grid grid-3">
               {services.map((s) => (
-                <article className="service-card reveal" key={s.en}>
+                <article className="service-card reveal" key={s.name.en}>
                   <span className="service-card__mark" aria-hidden="true" />
-                  <h3>{lang === "ar" ? s.ar : s.en}</h3>
-                  <p>{lang === "ar" ? s.arDesc : s.enDesc}</p>
+                  <h3>{s.name[lang]}</h3>
+                  <p>{s.desc[lang]}</p>
                 </article>
               ))}
             </div>
@@ -219,19 +220,19 @@ export default async function CompanyPage({
                       href={c.src}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={`${m.en} — ${card.name}`}
+                      aria-label={`${m.label[lang]}, ${card.name}`}
                     >
                       <Image
                         className="cert-card__photo"
                         src={c.src}
-                        alt={`${m.en} — ${card.name}`}
+                        alt={`${m.label[lang]}, ${card.name}`}
                         fill
                         sizes="(max-width: 620px) 100vw, (max-width: 960px) 50vw, 33vw"
                       />
                     </a>
                     <div className="cert-card__meta">
-                      <h3>{lang === "ar" ? m.ar : m.en}</h3>
-                      <p>{lang === "ar" ? m.noteAr : m.noteEn}</p>
+                      <h3>{m.label[lang]}</h3>
+                      <p>{m.note[lang]}</p>
                     </div>
                   </article>
                 );
@@ -255,13 +256,13 @@ export default async function CompanyPage({
                   <Image
                     className="project-card__img"
                     src={p.img}
-                    alt={lang === "ar" ? p.ar : p.en}
+                    alt={p[lang]}
                     width={600}
                     height={450}
                   />
                   <div className="project-card__meta">
-                    <span className="project-card__cat">{lang === "ar" ? PROJECT_CAT[p.kind].ar : PROJECT_CAT[p.kind].en}</span>
-                    <h3>{lang === "ar" ? p.ar : p.en}</h3>
+                    <span className="project-card__cat">{PROJECT_CAT[p.kind][lang]}</span>
+                    <h3>{p[lang]}</h3>
                   </div>
                 </article>
               ))}

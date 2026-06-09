@@ -30,11 +30,11 @@ export default function About({
                   className="about-logos__tile"
                   href={`/${lang}/companies/${m.slug}`}
                   style={{ "--accent": profile.accent } as CSSProperties}
-                  aria-label={lang === "ar" ? profile.name.ar : profile.name.en}
+                  aria-label={profile.name[lang]}
                 >
                   <Image
                     src={profile.logo}
-                    alt={lang === "ar" ? profile.name.ar : profile.name.en}
+                    alt={profile.name[lang]}
                     width={profile.logoW ?? 180}
                     height={profile.logoH ?? 100}
                   />

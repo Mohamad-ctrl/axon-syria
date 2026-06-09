@@ -5,7 +5,7 @@ import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getJobBySlug } from "@/lib/jobs";
 import ApplicationForm from "@/components/careers/ApplicationForm";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates } from "@/lib/site";
 import { MapPin, Clock } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -20,22 +20,26 @@ export async function generateMetadata({
   const dict = getDictionary(loc);
   const job = await getJobBySlug(slug);
   if (!job) return { title: dict.careers.notFound };
-  const desc = job.description[loc]?.[0] ?? job.title[loc];
+  // Job content is EN + AR (DB); Turkish (and any gap) falls back to English.
+  const pick = <T,>(f: { en: T; ar: T; tr?: T }): T => f[loc] ?? f.en;
+  const desc = pick(job.description)[0] ?? pick(job.title);
+  const titleSep = loc === "ar" ? "، " : ", ";
+  const title = `${pick(job.title)}${titleSep}${pick(job.company)}`;
   return {
-    title: `${job.title[loc]} — ${job.company[loc]}`,
+    title,
     description: desc,
     alternates: {
       canonical: `/${loc}/careers/${job.slug}`,
-      languages: { en: `/en/careers/${job.slug}`, ar: `/ar/careers/${job.slug}`, "x-default": `/en/careers/${job.slug}` },
+      languages: langAlternates(`/careers/${job.slug}`),
     },
     openGraph: {
       type: "article",
       siteName: "Axon Syria",
-      title: `${job.title[loc]} — ${job.company[loc]}`,
+      title,
       description: desc,
       url: `${SITE_URL}/${loc}/careers/${job.slug}`,
-      locale: loc === "ar" ? "ar_SY" : "en_GB",
-      alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
+      locale: ogLocale(loc),
+      alternateLocale: ogAlternateLocales(loc),
       images: [{ url: `${SITE_URL}/api/og`, width: 1200, height: 630, alt: "Axon Syria" }],
     },
   };
@@ -53,8 +57,11 @@ export default async function JobPage({
   const job = await getJobBySlug(slug);
   if (!job || !job.active) notFound();
 
+  // Job content is EN + AR (DB); Turkish (and any gap) falls back to English.
+  const pick = <T,>(f: { en: T; ar: T; tr?: T }): T => f[lang] ?? f.en;
+
   const postedLabel = new Date(job.posted).toLocaleDateString(
-    lang === "ar" ? "ar-AE" : "en-GB",
+    lang === "ar" ? "ar-AE" : lang === "tr" ? "tr-TR" : "en-GB",
     { day: "numeric", month: "long", year: "numeric" }
   );
 
@@ -62,14 +69,14 @@ export default async function JobPage({
   const jobLd = {
     "@context": "https://schema.org",
     "@type": "JobPosting",
-    title: job.title[lang],
-    description: [...job.description[lang], ...job.requirements[lang]].join(" "),
+    title: pick(job.title),
+    description: [...pick(job.description), ...pick(job.requirements)].join(" "),
     datePosted: new Date(job.posted).toISOString(),
     employmentType: /part/i.test(job.type.en) ? "PART_TIME" : "FULL_TIME",
-    hiringOrganization: { "@type": "Organization", name: job.company[lang], sameAs: SITE_URL },
+    hiringOrganization: { "@type": "Organization", name: pick(job.company), sameAs: SITE_URL },
     jobLocation: {
       "@type": "Place",
-      address: { "@type": "PostalAddress", addressLocality: job.location[lang], addressCountry: "SY" },
+      address: { "@type": "PostalAddress", addressLocality: pick(job.location), addressCountry: "SY" },
     },
   };
 
@@ -86,13 +93,13 @@ export default async function JobPage({
             <span aria-hidden="true">/</span>
             <Link href={`/${lang}/careers`}>{c.crumbCareers}</Link>
             <span aria-hidden="true">/</span>
-            <span>{job.title[lang]}</span>
+            <span>{pick(job.title)}</span>
           </div>
-          <span className="chip">{job.company[lang]}</span>
-          <h1 style={{ marginTop: ".6rem" }}>{job.title[lang]}</h1>
+          <span className="chip">{pick(job.company)}</span>
+          <h1 style={{ marginTop: ".6rem" }}>{pick(job.title)}</h1>
           <div className="job-card__meta" style={{ color: "#9FB0C7" }}>
-            <span><MapPin /> {job.location[lang]}</span>
-            <span><Clock /> {job.type[lang]}</span>
+            <span><MapPin /> {pick(job.location)}</span>
+            <span><Clock /> {pick(job.type)}</span>
           </div>
         </div>
       </section>
@@ -100,13 +107,13 @@ export default async function JobPage({
       <section className="section">
         <div className="container job-detail">
           <div className="prose reveal">
-            {job.description[lang].map((p, i) => (
+            {pick(job.description).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
 
             <h2>{c.requirements}</h2>
             <ul>
-              {job.requirements[lang].map((r) => (
+              {pick(job.requirements).map((r) => (
                 <li key={r}>{r}</li>
               ))}
             </ul>
@@ -114,9 +121,9 @@ export default async function JobPage({
 
           <aside className="job-aside reveal">
             <dl>
-              <div><dt>{c.detailCompany}</dt><dd>{job.company[lang]}</dd></div>
-              <div><dt>{c.detailLocation}</dt><dd>{job.location[lang]}</dd></div>
-              <div><dt>{c.detailType}</dt><dd>{job.type[lang]}</dd></div>
+              <div><dt>{c.detailCompany}</dt><dd>{pick(job.company)}</dd></div>
+              <div><dt>{c.detailLocation}</dt><dd>{pick(job.location)}</dd></div>
+              <div><dt>{c.detailType}</dt><dd>{pick(job.type)}</dd></div>
               <div><dt>{c.detailPosted}</dt><dd>{postedLabel}</dd></div>
             </dl>
             <a className="btn btn--primary btn--block" href="#apply">{c.applyNow}</a>
@@ -132,7 +139,7 @@ export default async function JobPage({
             <p className="lead">{c.applyLead}</p>
           </div>
           <div className="form-card reveal">
-            <ApplicationForm dict={dict.form} jobSlug={job.slug} jobTitle={job.title[lang]} />
+            <ApplicationForm dict={dict.form} jobSlug={job.slug} jobTitle={pick(job.title)} />
           </div>
         </div>
       </section>

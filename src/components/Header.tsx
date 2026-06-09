@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { Phone, Mail, Menu, Close } from "@/components/icons";
 import BrandMark from "@/components/BrandMark";
 import { companyProfiles } from "@/data/company-profiles";
-import type { Locale } from "@/i18n/config";
+import { isLocale, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export default function Header({
@@ -49,7 +49,7 @@ export default function Header({
 
   const swap = (target: Locale) => {
     const parts = pathname.split("/");
-    if (parts[1] === "en" || parts[1] === "ar") {
+    if (isLocale(parts[1])) {
       parts[1] = target;
       return parts.join("/") || `/${target}`;
     }
@@ -76,6 +76,8 @@ export default function Header({
             <Link href={swap("en")} aria-current={lang === "en" ? "true" : undefined}>EN</Link>
             <span aria-hidden="true">/</span>
             <Link href={swap("ar")} aria-current={lang === "ar" ? "true" : undefined}>ع</Link>
+            <span aria-hidden="true">/</span>
+            <Link href={swap("tr")} aria-current={lang === "tr" ? "true" : undefined}>TR</Link>
           </nav>
         </div>
       </div>
@@ -94,13 +96,13 @@ export default function Header({
                     <Image
                       className="nav__co-logo"
                       src={company.logo}
-                      alt={lang === "ar" ? company.name.ar : company.name.en}
+                      alt={company.name[lang]}
                       width={company.logoW ?? 130}
                       height={company.logoH ?? 36}
                     />
                   </span>
                 ) : (
-                  <span className="nav__co-mark">{lang === "ar" ? company.name.ar : company.name.en}</span>
+                  <span className="nav__co-mark">{company.name[lang]}</span>
                 )}
               </span>
             )}
@@ -137,6 +139,14 @@ export default function Header({
                 onClick={() => setOpen(false)}
               >
                 العربية
+              </Link>
+              <Link
+                href={swap("tr")}
+                className="nav__lang-btn"
+                aria-current={lang === "tr" ? "true" : undefined}
+                onClick={() => setOpen(false)}
+              >
+                Türkçe
               </Link>
             </div>
           </nav>

@@ -336,7 +336,8 @@ p  { color: var(--body); }
 .page-hero__inner { position: relative; max-width: 720px; }
 .page-hero h1 { color: #fff; }
 .page-hero p { color: #C9D6E8; margin-top: 1rem; font-size: clamp(1.05rem, 1.6vw, 1.2rem); max-width: 620px; }
-.crumbs { font-size: .85rem; color: #9FB0C7; margin-bottom: 1rem; display: flex; gap: .5rem; }
+.crumbs { font-size: .85rem; color: #9FB0C7; margin-bottom: 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .5rem; }
+.crumbs a { white-space: nowrap; }
 .crumbs a:hover { color: #fff; }
 
 /* Value cards (light bg) */
@@ -437,16 +438,23 @@ p  { color: var(--body); }
 .nav__co-logoWrap { display: inline-flex; align-items: center; }
 .nav__co-plate { padding: .3rem .55rem; border-radius: 9px; background: var(--accent, var(--dark)); }
 .nav__co-plate .nav__co-logo { height: 24px; }
-@media (max-width: 520px) { .nav__co { display: none; } }
+/* Keep the company co-brand visible on mobile (the Get in Touch button is hidden
+   there, so there's room); tighten spacing and shrink the logo a touch to fit. */
+@media (max-width: 520px) {
+  .nav__brand { gap: .5rem; }
+  .nav__co { gap: .5rem; }
+  .nav__co-logo { height: 30px; }
+}
 
 /* ==========================================================================
    Axon Syria — brand mark, logo cards, UAE-support section
    ========================================================================== */
 
 /* Brand wordmark (header / footer) — text-only "AXON SY" */
-.brand-mark { display: inline-flex; align-items: baseline; gap: .45rem; line-height: 1; font-family: var(--font-display); }
-.brand-mark__name { font-weight: 800; font-size: 1.45rem; letter-spacing: .045em; color: var(--ink); }
-.brand-mark__region { font-weight: 800; font-size: 1.45rem; letter-spacing: .045em; color: var(--brand); }
+/* Force LTR so the Latin wordmark always reads "AXON SY" (not reversed in RTL/Arabic). */
+.brand-mark { display: inline-flex; align-items: baseline; gap: .45rem; line-height: 1; font-family: var(--font-display); direction: ltr; }
+.brand-mark__name { font-weight: 800; font-size: 1.3rem; letter-spacing: .045em; color: var(--ink); }
+.brand-mark__region { font-weight: 800; font-size: 1.3rem; letter-spacing: .045em; color: var(--brand); }
 .brand-mark--light .brand-mark__name { color: #fff; }
 .brand-mark--light .brand-mark__region { color: #8C9DF4; }
 
@@ -482,14 +490,20 @@ p  { color: var(--body); }
 .uae__text { margin-top: 1rem; max-width: 56ch; }
 .uae-panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: clamp(1.5rem, 3vw, 2.2rem); box-shadow: var(--shadow); }
 .uae-panel__title { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.1rem; }
-.uae-chips { display: flex; flex-wrap: wrap; gap: .55rem; }
-.uae-chip {
-  display: inline-flex; align-items: center; padding: .5rem .95rem;
-  border-radius: var(--radius-pill); border: 1px solid var(--line-strong);
-  font-family: var(--font-display); font-weight: 600; font-size: .88rem; color: var(--ink);
-  transition: border-color var(--t-fast), color var(--t-fast), transform var(--t-fast);
+.uae-logos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 1.1rem .8rem; }
+.uae-logo { display: flex; flex-direction: column; align-items: center; gap: .55rem; text-align: center; }
+.uae-logo__plate {
+  width: 100%; height: 80px; display: grid; place-items: center;
+  padding: .4rem .7rem; border-radius: var(--radius);
+  background: #fff; border: 1px solid var(--line-strong);
 }
-.uae-chip:hover { border-color: var(--brand); color: var(--brand-600); transform: translateY(-1px); }
+.uae-logo__plate--dark { background: var(--dark); border-color: transparent; }
+.uae-logo__plate--mono { background: color-mix(in srgb, var(--brand) 8%, #fff); border-color: color-mix(in srgb, var(--brand) 22%, var(--line-strong)); }
+.uae-logo__img { max-width: 100%; max-height: 50px; width: auto; height: auto; object-fit: contain; }
+/* Square/compact logos (e.g. Green Dream) are height-limited, so give them more height to match the wide logos optically. */
+.uae-logo__img--big { max-height: 66px; }
+.uae-logo__mono { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; letter-spacing: .05em; color: var(--brand); }
+.uae-logo__name { font-family: var(--font-display); font-weight: 600; font-size: .8rem; line-height: 1.35; color: var(--ink); }
 @media (max-width: 880px) { .uae { grid-template-columns: 1fr; } }
 
 /* Directional arrow icons mirror horizontally in RTL (set in icons.tsx) */

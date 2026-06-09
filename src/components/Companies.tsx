@@ -67,16 +67,6 @@ export default function Companies({
                     >
                       {dict.learnMore} <ArrowRight />
                     </Link>
-                    {meta.website && (
-                      <a
-                        className="company-card__link company-card__link--ext"
-                        href={meta.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {dict.visit}
-                      </a>
-                    )}
                   </div>
                 </div>
               </article>

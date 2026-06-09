@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import ScrollFx from "@/components/ScrollFx";
 import { getDictionary } from "@/i18n/dictionaries";
 import { locales, isLocale, dir } from "@/i18n/config";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -46,7 +46,7 @@ export async function generateMetadata({
     description: dict.meta.description,
     alternates: {
       canonical: `/${loc}`,
-      languages: { en: "/en", ar: "/ar", "x-default": "/en" },
+      languages: langAlternates(),
     },
     openGraph: {
       type: "website",
@@ -54,8 +54,8 @@ export async function generateMetadata({
       title: dict.meta.title,
       description: dict.meta.description,
       url: `${SITE_URL}/${loc}`,
-      locale: loc === "ar" ? "ar_SY" : "en_GB",
-      alternateLocale: loc === "ar" ? "en_GB" : "ar_SY",
+      locale: ogLocale(loc),
+      alternateLocale: ogAlternateLocales(loc),
       images: [{ url: `${SITE_URL}/api/og`, width: 1200, height: 630, alt: "Axon Syria" }],
     },
     twitter: { card: "summary" },
@@ -82,7 +82,7 @@ const orgSchema = {
     email: "info@axon-sy.com",
     contactType: "customer service",
     areaServed: "SY",
-    availableLanguage: ["en", "ar"],
+    availableLanguage: ["en", "ar", "tr"],
   },
   // Axon Syria is an independent group SUPPORTED by Axon Group UAE — it is
   // deliberately modelled as `sponsor`, NOT `parentOrganization`.

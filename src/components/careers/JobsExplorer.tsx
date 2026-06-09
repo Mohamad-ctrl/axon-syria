@@ -27,11 +27,11 @@ export default function JobsExplorer({
           {jobs.map((job) => (
             <article className="job-card" key={job.slug}>
               <div>
-                <span className="chip">{job.company[lang]}</span>
-                <h3 style={{ marginTop: ".5rem" }}>{job.title[lang]}</h3>
+                <span className="chip">{job.company[lang] ?? job.company.en}</span>
+                <h3 style={{ marginTop: ".5rem" }}>{job.title[lang] ?? job.title.en}</h3>
                 <div className="job-card__meta">
-                  <span><MapPin /> {job.location[lang]}</span>
-                  <span><Clock /> {job.type[lang]}</span>
+                  <span><MapPin /> {job.location[lang] ?? job.location.en}</span>
+                  <span><Clock /> {job.type[lang] ?? job.type.en}</span>
                 </div>
               </div>
               <div className="job-card__cta">

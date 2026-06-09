@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase";
-import type { Locale } from "@/i18n/config";
 
-type L<T> = Record<Locale, T>;
+// Job content is authored EN + AR; Turkish is optional and falls back to EN.
+type L<T> = { en: T; ar: T; tr?: T };
 
 export type Job = {
   slug: string;

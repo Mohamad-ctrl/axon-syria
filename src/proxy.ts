@@ -6,10 +6,15 @@ import { locales, defaultLocale } from "@/i18n/config";
 // paths (e.g. /careers) to a locale-prefixed path (e.g. /en/careers).
 function getLocale(request: NextRequest): string {
   const accept = (request.headers.get("accept-language") || "").toLowerCase();
-  const arIdx = accept.indexOf("ar");
-  const enIdx = accept.indexOf("en");
-  if (arIdx !== -1 && (enIdx === -1 || arIdx < enIdx)) return "ar";
-  return defaultLocale;
+  // Pick whichever supported language appears earliest in Accept-Language.
+  const at = (code: string) => {
+    const i = accept.indexOf(code);
+    return i === -1 ? Infinity : i;
+  };
+  const best = (["ar", "tr", "en"] as const)
+    .map((code) => [code, at(code)] as const)
+    .sort((a, b) => a[1] - b[1])[0];
+  return best[1] === Infinity ? defaultLocale : best[0];
 }
 
 export function proxy(request: NextRequest) {

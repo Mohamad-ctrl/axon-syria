@@ -47,7 +47,7 @@ export default function Footer({
                 return (
                   <li key={m.slug}>
                     <Link href={`/${lang}/companies/${m.slug}`}>
-                      {lang === "ar" ? profile.name.ar : profile.name.en}
+                      {profile.name[lang]}
                     </Link>
                   </li>
                 );
@@ -71,9 +71,13 @@ export default function Footer({
               <li>
                 <MapPin />
                 <span>
-                  {lang === "ar"
-                    ? <>المدينة الصناعية الثانية، الشيخ نجار،<br />حلب، سوريا</>
-                    : <>Al Shaikh Najar, Second Industrial Area,<br />Aleppo, Syria</>}
+                  {lang === "ar" ? (
+                    <>المدينة الصناعية الثانية، الشيخ نجار،<br />حلب، سوريا</>
+                  ) : lang === "tr" ? (
+                    <>El Şeyh Neccar, İkinci Sanayi Bölgesi,<br />Halep, Suriye</>
+                  ) : (
+                    <>Al Shaikh Najar, Second Industrial Area,<br />Aleppo, Syria</>
+                  )}
                 </span>
               </li>
               <li>
