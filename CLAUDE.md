@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Bilingual (EN/AR, full RTL) Next.js 16 (App Router) + React 19 + TypeScript site for **Axon Syria** — an independent Syrian group of five companies — with a careers section and an admin dashboard. Forked from the Axon Group UAE site (`axongroup-next`, sibling folder) and re-themed/rewritten; the two sites share the same architecture.
+Trilingual (EN / AR / TR) Next.js 16 (App Router) + React 19 + TypeScript site for **Axon Syria** — an independent Syrian group of five companies — with a careers section and an admin dashboard. English and Arabic are the original locales (Arabic is full RTL); **Turkish was added later and is LTR**. Forked from the Axon Group UAE site (`axongroup-next`, sibling folder, which is still EN/AR only) and re-themed/rewritten; the two share the same architecture, but Axon Syria's localized data shapes have since diverged (see *i18n* below).
 
 ## ⚠️ Critical content rule — the UAE relationship
 
@@ -14,7 +14,8 @@ Bilingual (EN/AR, full RTL) Next.js 16 (App Router) + React 19 + TypeScript site
 
 - Always "supported by" / "بدعم من" — never "backed by", "sister companies" / "شركات شقيقة", "part of Axon Group", or "the group's UAE operations".
 - JSON-LD in `src/app/(site)/[lang]/layout.tsx` deliberately models Axon UAE as `sponsor`, **not** `parentOrganization` — keep it that way.
-- The UaeSupport homepage section states the independence explicitly in both languages; don't soften or remove it.
+- The UaeSupport homepage section states the independence explicitly in every language; don't soften or remove it.
+- **Copy style (all languages):** the owner wants human-sounding copy, not AI-sounding, and **bans the em-dash `—`** in user-facing text. Rewrite around it with commas, colons or shorter sentences. A normal hyphen and an en-dash in ranges (`Sat–Thu`) are fine.
 
 ## Commands
 
@@ -37,19 +38,22 @@ $env:Path = "C:\Users\User\nodejs;$env:Path"
 - `src/proxy.ts` (Next 16's renamed middleware) redirects locale-less paths; matcher excludes `api`, `admin`, images and any path with a file extension.
 - `params`/`searchParams` are **Promises** — `await` them.
 
-### i18n
-- `src/dictionaries/en.ts` is the **type source** (`Dictionary = typeof en`); `ar.ts` is typed against it, so missing/renamed keys break the build. Keep both in lockstep.
-- All user-facing text comes from the dictionaries or the bilingual data files — never hardcode strings in components.
+### i18n — trilingual EN / AR / TR
+- Locales live in `src/i18n/config.ts` (`locales = ["en","ar","tr"]`, `isLocale`, `dir`); only `ar` is RTL. **`getDictionary(locale)` now lives in `src/lib/content.ts` and is `async` + override-aware** (it deep-merges admin edits from Supabase over the static dictionaries, then falls back to them); `src/i18n/dictionaries.ts` keeps only the `Dictionary` type + the raw static defaults. `await` it. See *Content admin* below.
+- `src/dictionaries/en.ts` is the **type source** (`Dictionary = typeof en`); **both `ar.ts` and `tr.ts`** are typed against it, so a missing/renamed key breaks the build. Keep all three in lockstep.
+- **Locale selection is `obj[lang]`, never `lang === "ar" ? … : …`.** Every localized data object therefore carries all three locales — `Bilingual` is `{ en; ar; tr }`. Don't reintroduce binary `=== "ar"` branches when adding content.
+- All user-facing text comes from the dictionaries or the per-company data files — never hardcode strings in components.
 - `dict.stats` is an **array** of `{value, label}` (differs from the UAE site's object shape).
-- RTL: `dir="rtl"` + overrides in the `Arabic / RTL` section of `globals.css`. Directional arrows mirror via the `.icon-arrow` class set in `icons.tsx`.
-- The topbar EN/ع switch is hidden below 720px, so a second language switch renders inside the mobile nav drawer (`.nav__lang` in `Header.tsx` + `globals.css`).
+- SEO helpers in `src/lib/site.ts` centralize per-locale logic: `ogLocale` (`en_GB`/`ar_SY`/`tr_TR`), `ogAlternateLocales`, and `langAlternates(path)` (hreflang for all three + `x-default`). Use them in metadata + the sitemap instead of hand-writing locale maps.
+- RTL: `dir="rtl"` + overrides in the `Arabic / RTL` section of `globals.css`; the Cairo font loads only for `ar`. `BrandMark` is forced `direction: ltr` so "AXON SY" never reverses in RTL. Arrows mirror via `.icon-arrow` (`icons.tsx`).
+- Language switch: topbar EN / ع / TR (hidden below 720px) + a mobile-drawer switch (English / العربية / Türkçe) in `.nav__lang`; `Header.swap()` rewrites the locale segment of the current path.
 
-### The five companies — three index-aligned places
-`src/data/companies.ts` (`companyMeta`: 5 slugs — axon-contracting, axon-industry-trade, axon-integrated-facilities, axon-landscape, imdad) is **index-aligned** with `dict.companies.cards` in **both** `en.ts` and `ar.ts`; `src/data/company-profiles.ts` (accent, logo + dims, tagline, services, contact, optional `address`) is keyed by slug. Adding/reordering a company means touching all four in the same positions. Detail pages prerender via `generateStaticParams` over `companyMeta`.
+### The five companies — index-aligned places
+`src/data/companies.ts` (`companyMeta`: 5 slugs — axon-contracting, axon-industry-trade, axon-integrated-facilities, axon-landscape, imdad) is **index-aligned** with `dict.companies.cards` in **all three** dictionaries (`en.ts`, `ar.ts`, `tr.ts`); `src/data/company-profiles.ts` is keyed by slug and holds `accent`, logo + dims, `name`/`tagline` as `Bilingual`, `services` as **`{ name: Bilingual; desc: Bilingual }[]`** (restructured from the old flat `{en,ar,enDesc,arDesc}`), `contact`, optional `address`. Adding/reordering a company means touching the dictionaries and the profile in the same positions. Detail pages prerender via `generateStaticParams` over `companyMeta`.
 
 - Per-company **accent colors** were sampled from the official logos (in `public/images/companies/`). Accent-colored text and primary buttons run through `color-mix(... 70%, var(--ink))` in `globals.css` for WCAG contrast — the orange (industry) and sage (landscape) accents fail on white otherwise.
-- **No photography exists yet**: the hero is a designed CSS gradient, the About section is a logo mosaic, and company cards render logo plates tinted by accent. Drop-in points are documented in README.md.
-- `src/data/projects.ts` and `certificates.ts` are **empty maps by design** — detail-page sections auto-appear once entries (and images under `public/images/...`) are added. Imdad's ISO 9001/14001/45001 scans are the first expected certificates.
+- **Little site photography**: hero is a designed CSS gradient, About is a logo mosaic, company cards are accent-tinted logo plates. Exceptions: the homepage Projects section (real photos) and the UaeSupport panel (the seven Axon Group UAE logos in `public/images/uae-companies/` shown with names as **non-clickable** tiles).
+- **Projects** live in ONE homepage section, not under any company: `featuredProjects` in `src/data/projects.ts` rendered by `components/Projects.tsx` (between Companies and WhyAxon), photos in `public/images/projects/`, sourced from the group capability statement. The per-company `companyProjects` map is empty by design so the detail-page Projects section auto-hides. `certificates.ts` (`companyCertificates`) is likewise empty; `CERT_META` is `{ label: Bilingual; note: Bilingual }`. Imdad's ISO 9001/14001/45001 scans are the first expected certs (`public/images/certificates/<slug>/`).
 - The brand wordmark is `src/components/BrandMark.tsx` — text-only "AXON SY" (charcoal + brand blue). The owner removed the X-check glyph from the logo; only `public/favicon.svg` still uses it.
 
 ### Design system
@@ -60,6 +64,13 @@ One global stylesheet `src/app/globals.css` (no Tailwind/CSS Modules). Brand tok
 - `src/lib/jobs.ts` reads live; all three readers **degrade gracefully when env vars are missing** (careers shows "no openings", `/admin` shows a setup notice instead of crashing) — preserve that behaviour.
 - `src/data/jobs.ts` (`seedJobs`) is seed/reference only — the 7 jobs were already inserted into the DB; it is not read at runtime.
 - Admin auth is a signed cookie (`src/lib/admin-auth.ts`); mutations are server actions in `(admin)/admin/actions.ts` that re-check auth and `revalidatePath`. Jobs are authored in English; `src/lib/translate.ts` (Anthropic API) generates the Arabic, falling back to English without `ANTHROPIC_API_KEY`.
+- **Jobs are EN + AR only** (`L<T> = { en; ar; tr? }` in `lib/jobs.ts`), so **Turkish careers pages fall back to English** via a local `pick()` helper (`field[lang] ?? field.en`). `translate.ts` only produces Arabic, so making new jobs Turkish would mean extending it.
+
+### Content admin (editable site copy + images)
+Every section's text and images are editable from **`/admin/content`** without a redeploy. The TypeScript dictionaries (`src/dictionaries/*.ts`) and per-company data files stay the **typed defaults and fallback**; the admin stores *partial overrides* in a Supabase **`content`** table (one jsonb row per document: `dictionary`, `companyProfiles`, `projects`, `certificates`) and `src/lib/content.ts` **deep-merges them over the defaults** at render time (arrays replace wholesale). With no overrides, or no Supabase env, the site renders exactly as the static defaults.
+- `src/lib/content-schema.ts` is the single registry of editable sections (`SECTIONS`) + the pure logical⇄store transforms; it drives both the index and the generic `ContentEditor` (EN/AR/TR fields, list add/remove, color, image upload). Adding/renaming a dictionary key means updating the matching section's `fields` there too. The 5 company **cards** list is edit-only (locked) to stay index-aligned.
+- Reads are cached via `unstable_cache` tagged `content` (keeps home + company pages **static/SSG**); the save/reset server actions (`src/app/(admin)/admin/content-actions.ts`) call **`updateTag("content")`** (read-your-own-writes, blocking) so edits go live on the next request. NB: `revalidateTag` is two-arg here (`(tag, "max")`, stale-while-revalidate) — `updateTag` is what gives instant publish. Editing rows **directly in SQL** bypasses this, leaving the dev cache stale until `.next` is cleared.
+- Images upload to the **public `site-media` bucket** via the auth-guarded `src/app/api/admin/upload/route.ts`; the Supabase storage host is whitelisted in `next.config.ts` `images.remotePatterns`. The client `Header`/`Footer` get a slim, serializable company-nav map (built in the `[lang]` layout from the effective profiles) instead of importing the static data, so co-brand name/logo edits stay in sync.
 
 ### SEO & metadata
 - `src/lib/site.ts` exports `SITE_URL` (from `NEXT_PUBLIC_SITE_URL`, default `https://axon-sy.com`) — the single source for every absolute URL (`metadataBase`, canonical, OG, sitemap, JSON-LD). `layout.tsx` no longer hardcodes a domain.

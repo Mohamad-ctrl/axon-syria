@@ -155,6 +155,15 @@ const ar: Dictionary = {
     rights: "جميع الحقوق محفوظة.",
     location: "حلب، سوريا",
   },
+  contact: {
+    phone: "+963 21 473 1300",
+    email: "info@axon-sy.com",
+    address: "المدينة الصناعية الثانية، الشيخ نجار،\nحلب، سوريا",
+    linkedin: "#",
+    instagram: "#",
+    facebook: "#",
+    x: "#",
+  },
   careers: {
     metaTitle: "وظائف وفرص عمل في سوريا",
     metaDescription:

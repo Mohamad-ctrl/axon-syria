@@ -23,6 +23,12 @@ export function ogAlternateLocales(loc: Locale): string[] {
   return (Object.keys(OG_LOCALES) as Locale[]).filter((l) => l !== loc).map((l) => OG_LOCALES[l]);
 }
 
+/** A `tel:` href from a display phone number (strips spaces and separators,
+ *  keeping digits and a leading +). e.g. "+963 21 473 1300" -> "+963214731300". */
+export function telHref(phone: string): string {
+  return phone.replace(/[^\d+]/g, "");
+}
+
 /** hreflang alternates (relative paths) for a path without locale prefix, e.g. "/careers". */
 export function langAlternates(path = ""): Record<string, string> {
   return {

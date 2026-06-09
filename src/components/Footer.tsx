@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -11,18 +12,30 @@ import {
 } from "@/components/icons";
 import BrandMark from "@/components/BrandMark";
 import { companyMeta } from "@/data/companies";
-import { companyProfiles } from "@/data/company-profiles";
+import type { CompanyNav } from "@/data/company-profiles";
 import type { Locale } from "@/i18n/config";
+import { telHref } from "@/lib/site";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export default function Footer({
   lang,
   dict,
+  contact,
+  companies,
 }: {
   lang: Locale;
   dict: Dictionary["footer"];
+  contact: Dictionary["contact"];
+  companies: Record<string, CompanyNav>;
 }) {
   const year = new Date().getFullYear();
+  // Social links default to "#" (not configured); show only the ones with a real URL.
+  const socials = [
+    { href: contact.linkedin, label: "LinkedIn", Icon: Linkedin },
+    { href: contact.instagram, label: "Instagram", Icon: Instagram },
+    { href: contact.facebook, label: "Facebook", Icon: Facebook },
+    { href: contact.x, label: "X", Icon: XTwitter },
+  ].filter((s) => s.href && s.href !== "#");
   return (
     <footer className="site-footer">
       <div className="container">
@@ -30,19 +43,22 @@ export default function Footer({
           <div className="footer__brand">
             <BrandMark variant="light" />
             <p>{dict.tagline}</p>
-            <div className="footer__social">
-              <a href="#" aria-label="LinkedIn"><Linkedin /></a>
-              <a href="#" aria-label="Instagram"><Instagram /></a>
-              <a href="#" aria-label="Facebook"><Facebook /></a>
-              <a href="#" aria-label="X"><XTwitter /></a>
-            </div>
+            {socials.length > 0 && (
+              <div className="footer__social">
+                {socials.map(({ href, label, Icon }) => (
+                  <a key={label} href={href} aria-label={label} target="_blank" rel="noopener noreferrer">
+                    <Icon />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="footer__col">
             <h4>{dict.companiesTitle}</h4>
             <ul>
               {companyMeta.map((m) => {
-                const profile = companyProfiles[m.slug];
+                const profile = companies[m.slug];
                 if (!profile) return null;
                 return (
                   <li key={m.slug}>
@@ -71,22 +87,21 @@ export default function Footer({
               <li>
                 <MapPin />
                 <span>
-                  {lang === "ar" ? (
-                    <>المدينة الصناعية الثانية، الشيخ نجار،<br />حلب، سوريا</>
-                  ) : lang === "tr" ? (
-                    <>El Şeyh Neccar, İkinci Sanayi Bölgesi,<br />Halep, Suriye</>
-                  ) : (
-                    <>Al Shaikh Najar, Second Industrial Area,<br />Aleppo, Syria</>
-                  )}
+                  {contact.address.split("\n").map((line, i) => (
+                    <Fragment key={i}>
+                      {i > 0 && <br />}
+                      {line}
+                    </Fragment>
+                  ))}
                 </span>
               </li>
               <li>
                 <Phone />
-                <a href="tel:+963214731300">+963 21 473 1300</a>
+                <a href={`tel:${telHref(contact.phone)}`}>{contact.phone}</a>
               </li>
               <li>
                 <Mail />
-                <a href="mailto:info@axon-sy.com">info@axon-sy.com</a>
+                <a href={`mailto:${contact.email}`}>{contact.email}</a>
               </li>
               <li>
                 <Clock />

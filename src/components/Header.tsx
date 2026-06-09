@@ -7,16 +7,21 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Phone, Mail, Menu, Close } from "@/components/icons";
 import BrandMark from "@/components/BrandMark";
-import { companyProfiles } from "@/data/company-profiles";
+import type { CompanyNav } from "@/data/company-profiles";
 import { isLocale, type Locale } from "@/i18n/config";
+import { telHref } from "@/lib/site";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export default function Header({
   lang,
   dict,
+  contact,
+  companies,
 }: {
   lang: Locale;
   dict: Dictionary["nav"];
+  contact: Dictionary["contact"];
+  companies: Record<string, CompanyNav>;
 }) {
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
@@ -26,7 +31,7 @@ export default function Header({
   // mark beside the Axon logo, tinted with its accent.
   const parts = pathname.split("/");
   const companySlug = parts[2] === "companies" ? parts[3] : undefined;
-  const company = companySlug ? companyProfiles[companySlug] : undefined;
+  const company = companySlug ? companies[companySlug] : undefined;
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 8);
@@ -69,8 +74,8 @@ export default function Header({
       <div className="topbar">
         <div className="container topbar__inner">
           <div className="topbar__contact">
-            <a href="tel:+963214731300"><Phone /> +963 21 473 1300</a>
-            <a href="mailto:info@axon-sy.com"><Mail /> info@axon-sy.com</a>
+            <a href={`tel:${telHref(contact.phone)}`}><Phone /> {contact.phone}</a>
+            <a href={`mailto:${contact.email}`}><Mail /> {contact.email}</a>
           </div>
           <nav className="lang-switch" aria-label={dict.language}>
             <Link href={swap("en")} aria-current={lang === "en" ? "true" : undefined}>EN</Link>

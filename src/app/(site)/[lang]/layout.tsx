@@ -5,9 +5,9 @@ import "../../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollFx from "@/components/ScrollFx";
-import { getDictionary } from "@/i18n/dictionaries";
+import { getDictionary, getCompanyNav, type Dictionary } from "@/lib/content";
 import { locales, isLocale, dir } from "@/i18n/config";
-import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates } from "@/lib/site";
+import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates, telHref } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,7 +39,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const loc = isLocale(lang) ? lang : "en";
-  const dict = getDictionary(loc);
+  const dict = await getDictionary(loc);
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: dict.meta.title, template: "%s | Axon Syria" },
@@ -64,41 +64,46 @@ export async function generateMetadata({
   };
 }
 
-const orgSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Axon Syria",
-  url: `${SITE_URL}/en`,
-  logo: `${SITE_URL}/favicon.svg`,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Al Shaikh Najar, Second Industrial Area",
-    addressLocality: "Aleppo",
-    addressCountry: "SY",
-  },
-  contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+963214731300",
-    email: "info@axon-sy.com",
-    contactType: "customer service",
-    areaServed: "SY",
-    availableLanguage: ["en", "ar", "tr"],
-  },
-  // Axon Syria is an independent group SUPPORTED by Axon Group UAE — it is
-  // deliberately modelled as `sponsor`, NOT `parentOrganization`.
-  sponsor: {
+// The contact point reads the editable group phone/email so admin edits flow
+// through to structured data. The PostalAddress stays structured (the editable
+// address is one freeform field that doesn't map cleanly to street/locality).
+function buildOrgSchema(contact: Dictionary["contact"]) {
+  return {
+    "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Axon Group",
-    url: "https://axongroup.ae/",
-  },
-  subOrganization: [
-    { "@type": "Organization", name: "Axon Contracting", url: `${SITE_URL}/en/companies/axon-contracting` },
-    { "@type": "Organization", name: "Axon for Industry & Trade", url: `${SITE_URL}/en/companies/axon-industry-trade` },
-    { "@type": "Organization", name: "Axon Integrated Facilities Services", url: `${SITE_URL}/en/companies/axon-integrated-facilities` },
-    { "@type": "Organization", name: "Axon Landscape", url: `${SITE_URL}/en/companies/axon-landscape` },
-    { "@type": "Organization", name: "Imdad", url: `${SITE_URL}/en/companies/imdad`, sameAs: ["https://imdadgroup.com/"] },
-  ],
-};
+    name: "Axon Syria",
+    url: `${SITE_URL}/en`,
+    logo: `${SITE_URL}/favicon.svg`,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Al Shaikh Najar, Second Industrial Area",
+      addressLocality: "Aleppo",
+      addressCountry: "SY",
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: telHref(contact.phone),
+      email: contact.email,
+      contactType: "customer service",
+      areaServed: "SY",
+      availableLanguage: ["en", "ar", "tr"],
+    },
+    // Axon Syria is an independent group SUPPORTED by Axon Group UAE: it is
+    // deliberately modelled as `sponsor`, NOT `parentOrganization`.
+    sponsor: {
+      "@type": "Organization",
+      name: "Axon Group",
+      url: "https://axongroup.ae/",
+    },
+    subOrganization: [
+      { "@type": "Organization", name: "Axon Contracting", url: `${SITE_URL}/en/companies/axon-contracting` },
+      { "@type": "Organization", name: "Axon for Industry & Trade", url: `${SITE_URL}/en/companies/axon-industry-trade` },
+      { "@type": "Organization", name: "Axon Integrated Facilities Services", url: `${SITE_URL}/en/companies/axon-integrated-facilities` },
+      { "@type": "Organization", name: "Axon Landscape", url: `${SITE_URL}/en/companies/axon-landscape` },
+      { "@type": "Organization", name: "Imdad", url: `${SITE_URL}/en/companies/imdad`, sameAs: ["https://imdadgroup.com/"] },
+    ],
+  };
+}
 
 export default async function LangLayout({
   children,
@@ -109,7 +114,7 @@ export default async function LangLayout({
 }) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  const dict = getDictionary(lang);
+  const [dict, companies] = await Promise.all([getDictionary(lang), getCompanyNav()]);
   const fontVars =
     lang === "ar"
       ? `${inter.variable} ${jakarta.variable} ${cairo.variable}`
@@ -122,13 +127,13 @@ export default async function LangLayout({
           <style>{`.reveal{opacity:1!important;transform:none!important}`}</style>
         </noscript>
         <a className="skip-link" href="#main">{dict.nav.skip}</a>
-        <Header lang={lang} dict={dict.nav} />
+        <Header lang={lang} dict={dict.nav} contact={dict.contact} companies={companies} />
         <main id="main">{children}</main>
-        <Footer lang={lang} dict={dict.footer} />
+        <Footer lang={lang} dict={dict.footer} contact={dict.contact} companies={companies} />
         <ScrollFx />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildOrgSchema(dict.contact)) }}
         />
       </body>
     </html>

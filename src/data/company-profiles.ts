@@ -17,6 +17,16 @@
  */
 export type Bilingual = { en: string; ar: string; tr: string };
 export type ProfileService = { name: Bilingual; desc: Bilingual };
+/** The slim, serializable slice of a profile the header/footer need (passed to
+ *  the client `Header`, so it must stay plain data — no functions). */
+export type CompanyNav = {
+  accent: string;
+  name: Bilingual;
+  logo?: string;
+  logoW?: number;
+  logoH?: number;
+  logoOnDark?: boolean;
+};
 export type CompanyContact = { phone?: string; email?: string };
 export type CompanyProfile = {
   accent: string;

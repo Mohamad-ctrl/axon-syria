@@ -155,6 +155,15 @@ const tr: Dictionary = {
     rights: "Tüm hakları saklıdır.",
     location: "Halep, Suriye",
   },
+  contact: {
+    phone: "+963 21 473 1300",
+    email: "info@axon-sy.com",
+    address: "El Şeyh Neccar, İkinci Sanayi Bölgesi,\nHalep, Suriye",
+    linkedin: "#",
+    instagram: "#",
+    facebook: "#",
+    x: "#",
+  },
   careers: {
     metaTitle: "Suriye'de İşler ve Kariyer Fırsatları",
     metaDescription:

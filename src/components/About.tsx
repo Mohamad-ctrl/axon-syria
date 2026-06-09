@@ -3,16 +3,18 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import { Check } from "@/components/icons";
 import { companyMeta } from "@/data/companies";
-import { companyProfiles } from "@/data/company-profiles";
+import type { CompanyProfile } from "@/data/company-profiles";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export default function About({
   lang,
   dict,
+  profiles,
 }: {
   lang: Locale;
   dict: Dictionary["about"];
+  profiles: Record<string, CompanyProfile>;
 }) {
   return (
     <section className="section" id="about">
@@ -22,7 +24,7 @@ export default function About({
               stands in and doubles as a visual table of contents. */}
           <div className="about-logos" aria-label="The five Axon Syria companies">
             {companyMeta.map((m) => {
-              const profile = companyProfiles[m.slug];
+              const profile = profiles[m.slug];
               if (!profile?.logo) return null;
               return (
                 <Link

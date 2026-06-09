@@ -3,16 +3,18 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import { ArrowRight } from "@/components/icons";
 import { companyMeta } from "@/data/companies";
-import { companyProfiles } from "@/data/company-profiles";
+import type { CompanyProfile } from "@/data/company-profiles";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export default function Companies({
   lang,
   dict,
+  profiles,
 }: {
   lang: Locale;
   dict: Dictionary["companies"];
+  profiles: Record<string, CompanyProfile>;
 }) {
   return (
     <section className="section section--alt" id="companies">
@@ -26,7 +28,7 @@ export default function Companies({
         <div className="grid grid-3">
           {dict.cards.map((card, i) => {
             const meta = companyMeta[i];
-            const profile = companyProfiles[meta.slug];
+            const profile = profiles[meta.slug];
             const accentStyle = profile
               ? ({ "--accent": profile.accent } as CSSProperties)
               : undefined;

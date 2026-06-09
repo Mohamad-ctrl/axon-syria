@@ -153,6 +153,15 @@ const en = {
     rights: "All rights reserved.",
     location: "Aleppo, Syria",
   },
+  contact: {
+    phone: "+963 21 473 1300",
+    email: "info@axon-sy.com",
+    address: "Al Shaikh Najar, Second Industrial Area,\nAleppo, Syria",
+    linkedin: "#",
+    instagram: "#",
+    facebook: "#",
+    x: "#",
+  },
   careers: {
     metaTitle: "Jobs & Careers in Syria",
     metaDescription:

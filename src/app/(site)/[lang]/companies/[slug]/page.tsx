@@ -4,10 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/i18n/config";
-import { getDictionary } from "@/i18n/dictionaries";
+import { getDictionary, getCompanyProfile, getCompanyCertificates } from "@/lib/content";
 import { companyMeta } from "@/data/companies";
-import { companyProfiles } from "@/data/company-profiles";
-import { companyCertificates, CERT_META } from "@/data/certificates";
+import { CERT_META } from "@/data/certificates";
 import { companyProjects, PROJECT_CAT } from "@/data/projects";
 import { ArrowRight } from "@/components/icons";
 import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates } from "@/lib/site";
@@ -34,11 +33,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, slug } = await params;
   const loc = isLocale(lang) ? lang : "en";
-  const dict = getDictionary(loc);
+  const dict = await getDictionary(loc);
   const idx = companyMeta.findIndex((m) => m.slug === slug);
   if (idx === -1) return {};
   const card = dict.companies.cards[idx];
-  const profile = companyProfiles[slug];
+  const profile = await getCompanyProfile(slug);
   const tagline = profile ? profile.tagline[loc] : card.desc;
   const services = profile?.services ?? [];
   const description = buildDescription(loc, card.name, tagline, services.map((s) => s.name[loc]));
@@ -85,11 +84,13 @@ export default async function CompanyPage({
   const idx = companyMeta.findIndex((m) => m.slug === slug);
   if (idx === -1) notFound();
 
-  const dict = getDictionary(lang);
+  const [dict, profile, certs] = await Promise.all([
+    getDictionary(lang),
+    getCompanyProfile(slug),
+    getCompanyCertificates(slug),
+  ]);
   const card = dict.companies.cards[idx];
   const cd = dict.companyDetail;
-  const profile = companyProfiles[slug];
-  const certs = companyCertificates[slug] ?? [];
   const projects = companyProjects[slug] ?? [];
   const services = profile?.services ?? [];
   const tagline = profile ? profile.tagline[lang] : card.desc;

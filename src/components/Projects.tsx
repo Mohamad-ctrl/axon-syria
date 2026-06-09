@@ -1,16 +1,18 @@
 import Image from "next/image";
-import { featuredProjects, PROJECT_CAT } from "@/data/projects";
+import { PROJECT_CAT, type Project } from "@/data/projects";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export default function Projects({
   lang,
   dict,
+  projects,
 }: {
   lang: Locale;
   dict: Dictionary["projects"];
+  projects: Project[];
 }) {
-  if (featuredProjects.length === 0) return null;
+  if (projects.length === 0) return null;
   return (
     <section className="section" id="projects">
       <div className="container">
@@ -20,7 +22,7 @@ export default function Projects({
           <p className="lead">{dict.lead}</p>
         </div>
         <div className="grid grid-3">
-          {featuredProjects.map((p) => (
+          {projects.map((p) => (
             <article className="project-card reveal" key={p.img}>
               <Image
                 className="project-card__img"

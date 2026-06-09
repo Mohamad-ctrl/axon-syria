@@ -25,8 +25,9 @@ function rowToJob(row: JobRow): Job {
 }
 
 /** True once the (Syrian) Supabase project's env vars are configured. Until
- *  then the careers pages render gracefully with no openings instead of 500ing. */
-const hasSupabaseEnv = () =>
+ *  then the careers pages render gracefully with no openings instead of 500ing,
+ *  and the content layer falls back to the static TypeScript defaults. */
+export const hasSupabaseEnv = () =>
   Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 export async function getActiveJobs(): Promise<Job[]> {

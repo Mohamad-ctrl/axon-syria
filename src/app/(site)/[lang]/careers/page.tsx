@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/i18n/config";
-import { getDictionary } from "@/i18n/dictionaries";
+import { getDictionary } from "@/lib/content";
 import JobsExplorer from "@/components/careers/JobsExplorer";
 import { getActiveJobs } from "@/lib/jobs";
 import { ArrowRight, Growth, Users, Shield, Sparkle } from "@/components/icons";
@@ -17,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const loc = isLocale(lang) ? lang : "en";
-  const dict = getDictionary(loc);
+  const dict = await getDictionary(loc);
   return {
     title: dict.careers.metaTitle,
     description: dict.careers.metaDescription,
@@ -47,7 +47,7 @@ export default async function CareersPage({
 }) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  const dict = getDictionary(lang);
+  const dict = await getDictionary(lang);
   const c = dict.careers;
   const jobs = await getActiveJobs();
 

@@ -17,3 +17,7 @@ export function supabaseAdmin() {
 }
 
 export const CV_BUCKET = "cvs";
+/** Public bucket for admin-uploaded site media (project photos, company logos,
+ *  certificate scans). Public read; writes go through the service-role key in
+ *  the auth-guarded upload route. */
+export const MEDIA_BUCKET = "site-media";

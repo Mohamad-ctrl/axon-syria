@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/i18n/config";
-import { getDictionary } from "@/i18n/dictionaries";
+import { getDictionary } from "@/lib/content";
 import { getJobBySlug } from "@/lib/jobs";
 import ApplicationForm from "@/components/careers/ApplicationForm";
 import { SITE_URL, ogLocale, ogAlternateLocales, langAlternates } from "@/lib/site";
@@ -17,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang, slug } = await params;
   const loc = isLocale(lang) ? lang : "en";
-  const dict = getDictionary(loc);
+  const dict = await getDictionary(loc);
   const job = await getJobBySlug(slug);
   if (!job) return { title: dict.careers.notFound };
   // Job content is EN + AR (DB); Turkish (and any gap) falls back to English.
@@ -52,7 +52,7 @@ export default async function JobPage({
 }) {
   const { lang, slug } = await params;
   if (!isLocale(lang)) notFound();
-  const dict = getDictionary(lang);
+  const dict = await getDictionary(lang);
   const c = dict.careers;
   const job = await getJobBySlug(slug);
   if (!job || !job.active) notFound();
