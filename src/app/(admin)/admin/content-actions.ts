@@ -1,10 +1,11 @@
 "use server";
 
 import { updateTag } from "next/cache";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getCurrentUser, can } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { hasSupabaseEnv } from "@/lib/jobs";
 import { CONTENT_TAG, deepMerge, type ContentKey } from "@/lib/content";
+import { logAction } from "@/lib/audit";
 import {
   getSection,
   dictOverrideFromLogical,
@@ -48,7 +49,8 @@ async function writeDoc(key: ContentKey, data: Doc): Promise<void> {
  *  (trilingual leaves are `{ en, ar, tr }`); we transform it to the store shape,
  *  merge it into the content document and revalidate so edits publish at once. */
 export async function saveContentSection(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  if (!(await isAuthenticated())) return { ok: false, message: "Your session expired. Please sign in again." };
+  const actor = await getCurrentUser();
+  if (!can(actor, "content")) return { ok: false, message: "You don't have permission to edit content." };
   if (!hasSupabaseEnv()) return { ok: false, message: "The database isn't connected yet." };
 
   const id = String(formData.get("sectionId") ?? "");
@@ -87,6 +89,11 @@ export async function saveContentSection(_prev: ActionState, formData: FormData)
     // Server-Action read-your-own-writes: the next request waits for fresh data
     // instead of serving one stale render (revalidateTag's stale-while-revalidate).
     updateTag(CONTENT_TAG);
+    await logAction(actor, {
+      action: "content.saved",
+      summary: `Edited content: ${section.label}`,
+      details: { section: section.label, sectionId: section.id },
+    });
     return { ok: true, message: "Saved. Your changes are live." };
   } catch (err) {
     return { ok: false, message: err instanceof Error ? err.message : "Save failed. Please try again." };
@@ -95,7 +102,8 @@ export async function saveContentSection(_prev: ActionState, formData: FormData)
 
 /** Remove a section's override so it reverts to the built-in default content. */
 export async function resetContentSection(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  if (!(await isAuthenticated())) return { ok: false, message: "Your session expired. Please sign in again." };
+  const actor = await getCurrentUser();
+  if (!can(actor, "content")) return { ok: false, message: "You don't have permission to edit content." };
   if (!hasSupabaseEnv()) return { ok: false, message: "The database isn't connected yet." };
 
   const id = String(formData.get("sectionId") ?? "");
@@ -122,6 +130,11 @@ export async function resetContentSection(_prev: ActionState, formData: FormData
     // Server-Action read-your-own-writes: the next request waits for fresh data
     // instead of serving one stale render (revalidateTag's stale-while-revalidate).
     updateTag(CONTENT_TAG);
+    await logAction(actor, {
+      action: "content.reset",
+      summary: `Reset content to default: ${section.label}`,
+      details: { section: section.label, sectionId: section.id },
+    });
     return { ok: true, message: "Reverted to the default content." };
   } catch (err) {
     return { ok: false, message: err instanceof Error ? err.message : "Reset failed. Please try again." };

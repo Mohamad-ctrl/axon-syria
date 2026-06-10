@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
-import { checkCredentials, makeSessionToken, SESSION_COOKIE } from "@/lib/admin-auth";
+import { authenticate, SESSION_COOKIE } from "@/lib/admin-auth";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const username = String(body?.username ?? "");
   const password = String(body?.password ?? "");
 
-  if (!checkCredentials(username, password)) {
+  const result = await authenticate(username, password);
+  if (!result) {
     return NextResponse.json({ ok: false, error: "Invalid username or password." }, { status: 401 });
   }
 
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(SESSION_COOKIE, makeSessionToken(), {
+  const res = NextResponse.json({ ok: true, redirectTo: result.redirectTo });
+  res.cookies.set(SESSION_COOKIE, result.token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

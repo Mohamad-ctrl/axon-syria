@@ -1,13 +1,12 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { requireSection } from "@/lib/admin-auth";
 import { hasSupabaseEnv } from "@/lib/jobs";
 import { SECTIONS, SECTION_GROUPS } from "@/lib/content-schema";
 
 export const dynamic = "force-dynamic";
 
 export default async function ContentIndex() {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  await requireSection("content");
 
   return (
     <div className="admin-page">

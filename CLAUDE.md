@@ -64,6 +64,16 @@ One global stylesheet `src/app/globals.css` (no Tailwind/CSS Modules). Brand tok
 - `src/lib/jobs.ts` reads live; all three readers **degrade gracefully when env vars are missing** (careers shows "no openings", `/admin` shows a setup notice instead of crashing) — preserve that behaviour.
 - `src/data/jobs.ts` (`seedJobs`) is seed/reference only — the 7 jobs were already inserted into the DB; it is not read at runtime.
 - Admin auth is a signed cookie (`src/lib/admin-auth.ts`); mutations are server actions in `(admin)/admin/actions.ts` that re-check auth and `revalidatePath`. Jobs are authored in English; `src/lib/translate.ts` (Anthropic API) generates the Arabic, falling back to English without `ANTHROPIC_API_KEY`.
+
+### Admin users & roles
+- Accounts live in the **`admin_users`** table (`src/lib/users.ts`: scrypt password hashing + CRUD; RLS on, no policies). Each user is either an **administrator** (`is_admin` → all sections + user management) or has a **`permissions`** subset of `applications` / `jobs` / `content`. Pure constants/types live in client-safe **`src/lib/permissions.ts`** (so the client `UserForm` doesn't bundle the Supabase client).
+- **The SuperAdmin is the single env account** (`SUPERADMIN_USERNAME`/`SUPERADMIN_PASSWORD`, falling back to the legacy `ADMIN_USERNAME`/`ADMIN_PASSWORD`): cookie id `env`, `isSuperAdmin: true`, no DB row, so the dashboard can't be locked out and DB-down still allows login. **Only the SuperAdmin can add/remove/promote/demote admins or touch an admin account** (`canManageAdmins(user) === user.isSuperAdmin`, enforced in `users-actions.ts` and the users pages + `UserForm`). Normal DB admins (`is_admin`) have full section access but can only manage **non-admin** users. DB users are never SuperAdmin; DB users take precedence at login.
+- The signed cookie is `userId:issuedAt`; `getCurrentUser()` re-reads the user from the DB each request, and a password change (`password_changed_at` > `issuedAt`) invalidates older sessions. **Authorization is enforced server-side, not just in the nav:** every admin page calls `requireSection(section)` and every server action / the upload route calls `requireSectionAction(section)` (or `can(getCurrentUser(), section)`). `landingPath(user)` drives post-login + fallback redirects; users with nothing land on `/admin/no-access`.
+- User management UI is `(admin)/admin/users/*` (admin-only): list, create, edit (username + role/permissions), reset password, delete. Self-delete and removing the last DB admin are blocked. **Changing the role/permission model means updating `permissions.ts`, the `requireSection` guards, and `UserForm` together.**
+
+### Audit log
+- Every admin action is recorded in the **`audit_log`** table via `logAction(actor, { action, summary, details })` in `src/lib/audit.ts` (best-effort, **never throws** so it can't break the action). Instrumented: application stage changes (with candidate, role, from→to), job create/update/delete/(de)activate, content save/reset (with section), user create/update/password-reset/delete, and sign-in/out. **When you add a new admin action, add a `logAction` call** (actor = the value returned by `requireSectionAction`/`getCurrentUser`). Never put secrets (passwords) in `details`.
+- The viewer is the **admin-only** `log` section: `(admin)/admin/log` (newest first, category filter, full `details`). `log` and `users` are the admin-only sections in `can()`.
 - **Jobs are EN + AR only** (`L<T> = { en; ar; tr? }` in `lib/jobs.ts`), so **Turkish careers pages fall back to English** via a local `pick()` helper (`field[lang] ?? field.en`). `translate.ts` only produces Arabic, so making new jobs Turkish would mean extending it.
 
 ### Content admin (editable site copy + images)
@@ -81,12 +91,12 @@ Every section's text and images are editable from **`/admin/content`** without a
 - Google Search Console is verified via `verification.google` in the layout metadata + `public/google…html`.
 
 ### Runtime env vars (`.env.local`, git-ignored)
-`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `ANTHROPIC_API_KEY` (optional `ANTHROPIC_MODEL`). Keep secrets out of the repo. Plus the public, non-secret **`NEXT_PUBLIC_SITE_URL`** (canonical origin for SEO; defaults to `https://axon-sy.com` — see `src/lib/site.ts`).
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPERADMIN_USERNAME`, `SUPERADMIN_PASSWORD` (the single SuperAdmin login; legacy `ADMIN_USERNAME`/`ADMIN_PASSWORD` still honored as a fallback), `ADMIN_SESSION_SECRET`, `ANTHROPIC_API_KEY` (optional `ANTHROPIC_MODEL`). Keep secrets out of the repo. Plus the public, non-secret **`NEXT_PUBLIC_SITE_URL`** (canonical origin for SEO; defaults to `https://axon-sy.com` — see `src/lib/site.ts`).
 
 ## Known placeholders (see README.md for the full list)
 - **Live domain is `axon-sy.com`** (apex + `www`), centralized in `src/lib/site.ts` (`SITE_URL`, overridable via `NEXT_PUBLIC_SITE_URL`) — `layout.tsx` no longer hardcodes a domain; Search Console is verified and the sitemap submitted.
 - Group phone `+963 21 473 1300` is Imdad's published Aleppo line; group email is `info@axon-sy.com`; footer social links still point to `#`.
-- Default admin credentials (`admin`/`admin`) must change before launch — set `ADMIN_USERNAME`/`ADMIN_PASSWORD` and a strong `ADMIN_SESSION_SECRET` in Vercel.
+- Default SuperAdmin credentials (`admin`/`admin`) must change before launch — set `SUPERADMIN_USERNAME`/`SUPERADMIN_PASSWORD` and a strong `ADMIN_SESSION_SECRET` in Vercel.
 
 ## Source material
 Company scope and the Arabic names come from the licensed-activity Word docs and logos in `../Syria website/`; Imdad's facts come from imdadgroup.com. Don't invent capabilities, years, clients or projects beyond those sources — the four Axon companies are newly registered and have no Syrian track record (Imdad is the only established one).

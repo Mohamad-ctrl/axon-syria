@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { requireSection } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { ALL_STAGES, STAGE_LABEL, type Stage } from "@/lib/stages";
 import ApplicationsTable from "./ApplicationsTable";
@@ -22,7 +21,7 @@ export default async function AdminDashboard({
 }: {
   searchParams: Promise<{ stage?: string }>;
 }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  await requireSection("applications");
 
   // Friendly setup notice instead of a crash while Supabase env vars are unset.
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {

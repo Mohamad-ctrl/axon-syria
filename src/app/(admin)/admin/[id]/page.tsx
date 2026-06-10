@@ -1,6 +1,6 @@
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { requireSection } from "@/lib/admin-auth";
 import { supabaseAdmin, CV_BUCKET } from "@/lib/supabase";
 import { PIPELINE, STAGE_LABEL, nextStage, type Stage } from "@/lib/stages";
 import { setStage } from "../actions";
@@ -27,7 +27,7 @@ export default async function ApplicationDetail({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  await requireSection("applications");
 
   const { id } = await params;
   const supabase = supabaseAdmin();

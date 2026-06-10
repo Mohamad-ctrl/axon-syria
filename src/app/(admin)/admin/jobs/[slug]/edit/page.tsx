@@ -1,6 +1,6 @@
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { requireSection } from "@/lib/admin-auth";
 import { getJobBySlug } from "@/lib/jobs";
 import { updateJob } from "../../../actions";
 import JobForm from "../../JobForm";
@@ -12,7 +12,7 @@ export default async function EditJobPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  await requireSection("jobs");
 
   const { slug } = await params;
   const job = await getJobBySlug(slug);

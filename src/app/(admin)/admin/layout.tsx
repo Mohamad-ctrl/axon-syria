@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "../../globals.css";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getCurrentUser, can, landingPath } from "@/lib/admin-auth";
 import LogoutButton from "./LogoutButton";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-inter", display: "swap" });
@@ -15,21 +15,43 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const authed = await isAuthenticated();
+  const user = await getCurrentUser();
+
+  const links: { href: string; label: string }[] = [];
+  if (user) {
+    if (can(user, "applications")) links.push({ href: "/admin", label: "Applications" });
+    if (can(user, "jobs")) links.push({ href: "/admin/jobs", label: "Jobs" });
+    if (can(user, "content")) links.push({ href: "/admin/content", label: "Content" });
+    if (can(user, "users")) links.push({ href: "/admin/users", label: "Users" });
+    if (can(user, "log")) links.push({ href: "/admin/log", label: "Log" });
+  }
+
   return (
     <html lang="en" dir="ltr" className={`${inter.variable} ${jakarta.variable}`}>
       <body>
         <header className="admin-topbar">
           <div className="admin-topbar__inner">
-            <a href="/admin" className="admin-brand">Axon <span>Admin</span></a>
-            {authed && (
+            <a href={user ? landingPath(user) : "/admin"} className="admin-brand">
+              Axon <span>Admin</span>
+            </a>
+            {user && (
               <nav className="admin-nav">
-                <a href="/admin">Applications</a>
-                <a href="/admin/jobs">Jobs</a>
-                <a href="/admin/content">Content</a>
+                {links.map((l) => (
+                  <a key={l.href} href={l.href}>
+                    {l.label}
+                  </a>
+                ))}
               </nav>
             )}
-            {authed && <LogoutButton />}
+            {user && (
+              <div className="admin-topbar__user">
+                <span className="admin-whoami" title={user.isAdmin ? "Administrator" : "Limited access"}>
+                  {user.username}
+                  {user.isAdmin && <span className="admin-badge">admin</span>}
+                </span>
+                <LogoutButton />
+              </div>
+            )}
           </div>
         </header>
         <main className="admin-main">{children}</main>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { getCurrentUser, can } from "@/lib/admin-auth";
 import { supabaseAdmin, MEDIA_BUCKET } from "@/lib/supabase";
 
 /**
@@ -12,7 +12,7 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp", "image/gif", "image/avif"];
 
 export async function POST(request: Request) {
-  if (!(await isAuthenticated())) {
+  if (!can(await getCurrentUser(), "content")) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 

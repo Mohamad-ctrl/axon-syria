@@ -1,5 +1,5 @@
-import { notFound, redirect } from "next/navigation";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { notFound } from "next/navigation";
+import { requireSection } from "@/lib/admin-auth";
 import {
   getSection,
   dictToLogical,
@@ -23,7 +23,7 @@ export default async function ContentSectionPage({
 }: {
   params: Promise<{ section: string }>;
 }) {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  await requireSection("content");
 
   const { section: id } = await params;
   const section = getSection(id);

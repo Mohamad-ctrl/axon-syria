@@ -1,13 +1,12 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { requireSection } from "@/lib/admin-auth";
 import { createJob } from "../../actions";
 import JobForm from "../JobForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewJobPage() {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  await requireSection("jobs");
 
   return (
     <div className="admin-page">

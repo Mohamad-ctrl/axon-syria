@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { requireSection } from "@/lib/admin-auth";
 import { getAllJobs } from "@/lib/jobs";
 import { setJobActive } from "../actions";
 import DeleteJobButton from "./DeleteJobButton";
@@ -8,7 +7,7 @@ import DeleteJobButton from "./DeleteJobButton";
 export const dynamic = "force-dynamic";
 
 export default async function AdminJobs() {
-  if (!(await isAuthenticated())) redirect("/admin/login");
+  await requireSection("jobs");
   const jobs = await getAllJobs();
   const activeCount = jobs.filter((j) => j.active).length;
 

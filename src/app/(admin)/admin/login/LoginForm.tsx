@@ -21,7 +21,7 @@ export default function LoginForm() {
       });
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.ok) {
-        router.replace("/admin");
+        router.replace(typeof json.redirectTo === "string" ? json.redirectTo : "/admin");
         router.refresh();
       } else {
         setError(json.error || "Login failed.");

@@ -1,25 +1,56 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isAuthenticated } from "@/lib/admin-auth";
+import { requireSectionAction } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import { isStage } from "@/lib/stages";
+import { isStage, STAGE_LABEL, type Stage } from "@/lib/stages";
 import { translateJobToArabic } from "@/lib/translate";
 import { getJobBySlug, type Job } from "@/lib/jobs";
+import { logAction } from "@/lib/audit";
 import { redirect } from "next/navigation";
 
 export async function setStage(formData: FormData) {
-  if (!(await isAuthenticated())) throw new Error("Unauthorized");
+  const actor = await requireSectionAction("applications");
 
   const id = String(formData.get("id") ?? "");
   const stage = String(formData.get("stage") ?? "");
   if (!id || !isStage(stage)) throw new Error("Invalid request");
+
+  // Snapshot the candidate + previous stage before the update, for the log.
+  const { data: appRow } = await supabaseAdmin()
+    .from("applications")
+    .select("first_name,last_name,job_title,email,stage")
+    .eq("id", id)
+    .maybeSingle();
 
   const { error } = await supabaseAdmin().from("applications").update({ stage }).eq("id", id);
   if (error) throw new Error(error.message);
 
   revalidatePath("/admin");
   revalidatePath(`/admin/${id}`);
+
+  const row = appRow as
+    | { first_name: string; last_name: string; job_title: string; email: string; stage: Stage }
+    | null;
+  const candidate = row ? `${row.first_name} ${row.last_name}`.trim() : "an applicant";
+  const role = row?.job_title ?? "";
+  const toLabel = STAGE_LABEL[stage];
+  const summary =
+    stage === "rejected"
+      ? `Rejected ${candidate}${role ? ` (${role})` : ""}`
+      : `Moved ${candidate}${role ? ` (${role})` : ""} to ${toLabel}`;
+  await logAction(actor, {
+    action: "application.stage_changed",
+    summary,
+    details: {
+      candidate,
+      role,
+      email: row?.email,
+      from: row ? STAGE_LABEL[row.stage] ?? row.stage : undefined,
+      to: toLabel,
+      applicationId: id,
+    },
+  });
 }
 
 function slugify(s: string): string {
@@ -75,7 +106,7 @@ async function jobDataFromForm(formData: FormData, existing?: Job) {
 }
 
 export async function createJob(formData: FormData) {
-  if (!(await isAuthenticated())) throw new Error("Unauthorized");
+  const actor = await requireSectionAction("jobs");
 
   const data = await jobDataFromForm(formData);
   const slug = slugify(data.title.en);
@@ -88,11 +119,16 @@ export async function createJob(formData: FormData) {
   revalidatePath("/admin/jobs");
   revalidatePath("/en/careers");
   revalidatePath("/ar/careers");
+  await logAction(actor, {
+    action: "job.created",
+    summary: `Created job "${data.title.en}"`,
+    details: { slug, title: data.title.en, company: data.company.en, type: data.type.en },
+  });
   redirect("/admin/jobs");
 }
 
 export async function updateJob(formData: FormData) {
-  if (!(await isAuthenticated())) throw new Error("Unauthorized");
+  const actor = await requireSectionAction("jobs");
   const slug = String(formData.get("slug") ?? "").trim();
   if (!slug) throw new Error("Missing job identifier.");
 
@@ -112,14 +148,20 @@ export async function updateJob(formData: FormData) {
   revalidatePath("/ar/careers");
   revalidatePath(`/en/careers/${slug}`);
   revalidatePath(`/ar/careers/${slug}`);
+  await logAction(actor, {
+    action: "job.updated",
+    summary: `Edited job "${data.title.en}"`,
+    details: { slug, title: data.title.en },
+  });
   redirect("/admin/jobs");
 }
 
 export async function deleteJob(formData: FormData) {
-  if (!(await isAuthenticated())) throw new Error("Unauthorized");
+  const actor = await requireSectionAction("jobs");
   const slug = String(formData.get("slug") ?? "").trim();
   if (!slug) throw new Error("Missing slug");
 
+  const existing = await getJobBySlug(slug);
   const { error } = await supabaseAdmin().from("jobs").delete().eq("slug", slug);
   if (error) throw new Error(error.message);
 
@@ -127,18 +169,29 @@ export async function deleteJob(formData: FormData) {
   revalidatePath("/admin/jobs");
   revalidatePath("/en/careers");
   revalidatePath("/ar/careers");
+  await logAction(actor, {
+    action: "job.deleted",
+    summary: `Deleted job "${existing?.title.en ?? slug}"`,
+    details: { slug, title: existing?.title.en ?? slug },
+  });
 }
 
 export async function setJobActive(formData: FormData) {
-  if (!(await isAuthenticated())) throw new Error("Unauthorized");
+  const actor = await requireSectionAction("jobs");
   const slug = String(formData.get("slug") ?? "");
   const active = String(formData.get("active") ?? "") === "true";
   if (!slug) throw new Error("Missing slug");
 
+  const existing = await getJobBySlug(slug);
   const { error } = await supabaseAdmin().from("jobs").update({ active }).eq("slug", slug);
   if (error) throw new Error(error.message);
 
   revalidatePath("/admin/jobs");
   revalidatePath("/en/careers");
   revalidatePath("/ar/careers");
+  await logAction(actor, {
+    action: active ? "job.activated" : "job.deactivated",
+    summary: `${active ? "Published" : "Unpublished"} job "${existing?.title.en ?? slug}"`,
+    details: { slug, title: existing?.title.en ?? slug, active },
+  });
 }
