@@ -59,7 +59,13 @@ export async function generateMetadata({
       images: [{ url: `${SITE_URL}/api/og`, width: 1200, height: 630, alt: "Axon Syria" }],
     },
     twitter: { card: "summary" },
-    icons: { icon: "/favicon.svg" },
+    icons: {
+      icon: [
+        { url: "/favicon.svg", type: "image/svg+xml" },
+        { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      ],
+      apple: "/icon.png",
+    },
     verification: { google: "cK_3SUf6_35b75IDjZq37BitrT8v80GSGIHhXa8nJe8" },
   };
 }
@@ -73,7 +79,7 @@ function buildOrgSchema(contact: Dictionary["contact"]) {
     "@type": "Organization",
     name: "Axon Syria",
     url: `${SITE_URL}/en`,
-    logo: `${SITE_URL}/favicon.svg`,
+    logo: `${SITE_URL}/icon.png`,
     address: {
       "@type": "PostalAddress",
       streetAddress: "Al Shaikh Najar, Second Industrial Area",
