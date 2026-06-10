@@ -73,7 +73,7 @@ One global stylesheet `src/app/globals.css` (no Tailwind/CSS Modules). Brand tok
 
 ### Audit log
 - Every admin action is recorded in the **`audit_log`** table via `logAction(actor, { action, summary, details })` in `src/lib/audit.ts` (best-effort, **never throws** so it can't break the action). Instrumented: application stage changes (with candidate, role, from→to), job create/update/delete/(de)activate, content save/reset (with section), user create/update/password-reset/delete, and sign-in/out. **When you add a new admin action, add a `logAction` call** (actor = the value returned by `requireSectionAction`/`getCurrentUser`). Never put secrets (passwords) in `details`.
-- The viewer is the **admin-only** `log` section: `(admin)/admin/log` (newest first, category filter, full `details`). `log` and `users` are the admin-only sections in `can()`.
+- The viewer is the **SuperAdmin-only** `log` section: `(admin)/admin/log` (newest first, category filter, full `details`). In `can()`, `log` requires `isSuperAdmin` (normal admins can't see it) and `users` requires `isAdmin`.
 - **Jobs are EN + AR only** (`L<T> = { en; ar; tr? }` in `lib/jobs.ts`), so **Turkish careers pages fall back to English** via a local `pick()` helper (`field[lang] ?? field.en`). `translate.ts` only produces Arabic, so making new jobs Turkish would mean extending it.
 
 ### Content admin (editable site copy + images)

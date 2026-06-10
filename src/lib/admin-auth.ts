@@ -129,8 +129,10 @@ export async function isAuthenticated(): Promise<boolean> {
 /** Whether a user may access a section. Admins can access everything. */
 export function can(user: AdminUser | null, section: Section): boolean {
   if (!user) return false;
+  // The activity log is SuperAdmin-only — even normal admins can't see it.
+  if (section === "log") return !!user.isSuperAdmin;
   if (user.isAdmin) return true;
-  if (section === "users" || section === "log") return false;
+  if (section === "users") return false;
   return user.permissions.includes(section);
 }
 
