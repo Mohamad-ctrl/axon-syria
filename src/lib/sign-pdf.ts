@@ -16,7 +16,7 @@
  * Approving a request is never blocked by stamping. Never import this into a
  * Client Component.
  */
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 import { getDocumentProxy } from "unpdf";
 
 export type StampPlacement = "detected" | "ai" | "fallback" | "manual";
@@ -123,23 +123,8 @@ export async function stampSignature(
     const scale = Math.min(IMG_MAX_W / img.width, IMG_MAX_H / img.height, 1);
     const w = img.width * scale;
     const h = img.height * scale;
-    page.drawImage(img, { x: x + (BOX_W - w) / 2, y: y + 14, width: w, height: h });
-
-    // Helvetica is WinAnsi-only (it throws on Arabic), so the stamp line stays
-    // ASCII. No em-dash: the stamped PDF is user-facing copy.
-    const font = await doc.embedFont(StandardFonts.Helvetica);
-    // The version makes superseded signed copies self-identifying.
-    const label =
-      `Approved on ${opts.approvedAt.toISOString().slice(0, 10)}` +
-      (opts.version ? ` (v${opts.version})` : "");
-    const lw = font.widthOfTextAtSize(label, 9);
-    page.drawText(label, {
-      x: x + (BOX_W - lw) / 2,
-      y: y + 2,
-      size: 9,
-      font,
-      color: rgb(0.25, 0.25, 0.25),
-    });
+    // Just the signature, centered in the box (no date label).
+    page.drawImage(img, { x: x + (BOX_W - w) / 2, y: y + (BOX_H - h) / 2, width: w, height: h });
 
     const bytes = await doc.save();
     // pdf-lib can silently emit corrupt output for some encrypted/malformed
