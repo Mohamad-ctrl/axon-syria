@@ -42,6 +42,7 @@ export default async function ApprovalsPage() {
       sectionLabel: SECTION_LABEL[r.section],
       companyName: company?.name ?? r.companySlug,
       country: company?.country ?? "",
+      createdAt: r.createdAt,
       created: new Date(r.createdAt).toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
