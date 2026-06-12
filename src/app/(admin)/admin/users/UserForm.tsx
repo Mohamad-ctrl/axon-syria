@@ -22,7 +22,9 @@ export default function UserForm({
     ok: false,
     message: "",
   });
-  const [isAdmin, setIsAdmin] = useState(allowAdmin ? (user?.isAdmin ?? false) : false);
+  const [role, setRole] = useState<"user" | "admin" | "ceo">(
+    allowAdmin ? (user?.isCeo ? "ceo" : user?.isAdmin ? "admin" : "user") : "user",
+  );
 
   return (
     <form action={formAction} className="form">
@@ -43,20 +45,46 @@ export default function UserForm({
 
       {allowAdmin && (
         <div className="field">
-          <label className="ce-check">
-            <input
-              type="checkbox"
-              name="is_admin"
-              checked={isAdmin}
-              onChange={(e) => setIsAdmin(e.target.checked)}
-            />
-            Administrator (full access to every section)
-          </label>
-          <span className="field__hint">Only the SuperAdmin can create or change admins.</span>
+          <label>Role</label>
+          <div className="ce-checks">
+            <label className="ce-check">
+              <input
+                type="radio"
+                name="role"
+                value="user"
+                checked={role === "user"}
+                onChange={() => setRole("user")}
+              />
+              Standard user (access only to the sections picked below)
+            </label>
+            <label className="ce-check">
+              <input
+                type="radio"
+                name="role"
+                value="admin"
+                checked={role === "admin"}
+                onChange={() => setRole("admin")}
+              />
+              Administrator (full access to every section)
+            </label>
+            <label className="ce-check">
+              <input
+                type="radio"
+                name="role"
+                value="ceo"
+                checked={role === "ceo"}
+                onChange={() => setRole("ceo")}
+              />
+              CEO (decides approval requests and owns the signature)
+            </label>
+          </div>
+          <span className="field__hint">
+            Only the SuperAdmin can assign roles, and there can be only one CEO account.
+          </span>
         </div>
       )}
 
-      {!isAdmin && (
+      {role === "user" && (
         <div className="field">
           <label>Section access</label>
           <div className="ce-checks">

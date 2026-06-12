@@ -14,6 +14,13 @@ const supabaseHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Approval-request PDFs are uploaded through server actions; the default
+    // body cap is 1MB. Validation caps the file at 4MB; 4.5MB matches
+    // Vercel's platform request limit (this option is global, so keep it as
+    // tight as the largest legitimate upload allows).
+    serverActions: { bodySizeLimit: "4.5mb" },
+  },
   images: {
     remotePatterns: [
       {

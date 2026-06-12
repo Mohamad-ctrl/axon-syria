@@ -13,8 +13,9 @@ import { logAction } from "@/lib/audit";
 const COOKIE = "axon_admin";
 export const SESSION_COOKIE = COOKIE;
 
-/** Every section the dashboard guards. `users` and `log` are admin-only. */
-export type Section = Permission | "users" | "log";
+/** Every section the dashboard guards. `users` and `log` are admin-only;
+ *  `signature` (the CEO signature manager) is SuperAdmin + CEO only. */
+export type Section = Permission | "users" | "log" | "signature";
 
 /** The built-in bootstrap superadmin id (env credentials, no DB row). */
 const ENV_ID = "env";
@@ -119,20 +120,32 @@ export async function getCurrentUser(): Promise<AdminUser | null> {
   if (!user) return null;
   // The password changed since this session was issued → force re-login.
   if (stamp !== user.passwordChangedAt) return null;
-  return { id: user.id, username: user.username, isAdmin: user.isAdmin, permissions: user.permissions };
+  return {
+    id: user.id,
+    username: user.username,
+    isAdmin: user.isAdmin,
+    isCeo: user.isCeo,
+    permissions: user.permissions,
+  };
 }
 
 export async function isAuthenticated(): Promise<boolean> {
   return (await getCurrentUser()) !== null;
 }
 
-/** Whether a user may access a section. Admins can access everything. */
+/** Whether a user may access a section. Admins can access everything except
+ *  the log and the signature manager. */
 export function can(user: AdminUser | null, section: Section): boolean {
   if (!user) return false;
   // The activity log is SuperAdmin-only — even normal admins can't see it.
   if (section === "log") return !!user.isSuperAdmin;
+  // The CEO signature is managed only by the SuperAdmin and the CEO —
+  // this must precede the isAdmin catch-all so admins don't see it.
+  if (section === "signature") return !!user.isSuperAdmin || !!user.isCeo;
   if (user.isAdmin) return true;
   if (section === "users") return false;
+  // The CEO's approvals access comes from the role, not a permissions row.
+  if (section === "approvals" && user.isCeo) return true;
   return user.permissions.includes(section);
 }
 
@@ -142,11 +155,21 @@ export function canManageAdmins(user: AdminUser | null): boolean {
   return !!user?.isSuperAdmin;
 }
 
+/** Approving / holding / rejecting requests is the CEO's function; the
+ *  SuperAdmin keeps full unrestricted access. Regular admins and secretaries
+ *  can create requests and upload versions but never decide. */
+export function canDecideApprovals(user: AdminUser | null): boolean {
+  return !!user?.isSuperAdmin || !!user?.isCeo;
+}
+
 /** The first section a user can access, for post-login / fallback redirects. */
 export function landingPath(user: AdminUser): string {
+  // The CEO's whole job here is approvals — land there directly.
+  if (user.isCeo) return "/admin/approvals";
   if (can(user, "applications")) return "/admin";
   if (can(user, "jobs")) return "/admin/jobs";
   if (can(user, "content")) return "/admin/content";
+  if (can(user, "approvals")) return "/admin/approvals";
   if (can(user, "users")) return "/admin/users";
   return "/admin/no-access";
 }

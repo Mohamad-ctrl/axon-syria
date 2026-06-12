@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "../../globals.css";
 import { getCurrentUser, can, landingPath } from "@/lib/admin-auth";
-import LogoutButton from "./LogoutButton";
+import AdminBar from "./AdminBar";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-inter", display: "swap" });
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["700", "800"], variable: "--font-jakarta", display: "swap" });
@@ -22,6 +22,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     if (can(user, "applications")) links.push({ href: "/admin", label: "Applications" });
     if (can(user, "jobs")) links.push({ href: "/admin/jobs", label: "Jobs" });
     if (can(user, "content")) links.push({ href: "/admin/content", label: "Content" });
+    if (can(user, "approvals")) links.push({ href: "/admin/approvals", label: "Approvals" });
+    if (can(user, "signature")) links.push({ href: "/admin/signature", label: "Signature" });
     if (can(user, "users")) links.push({ href: "/admin/users", label: "Users" });
     if (can(user, "log")) links.push({ href: "/admin/log", label: "Log" });
   }
@@ -35,22 +37,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               Axon <span>Admin</span>
             </a>
             {user && (
-              <nav className="admin-nav">
-                {links.map((l) => (
-                  <a key={l.href} href={l.href}>
-                    {l.label}
-                  </a>
-                ))}
-              </nav>
-            )}
-            {user && (
-              <div className="admin-topbar__user">
-                <span className="admin-whoami" title={user.isAdmin ? "Administrator" : "Limited access"}>
-                  {user.username}
-                  {user.isAdmin && <span className="admin-badge">admin</span>}
-                </span>
-                <LogoutButton />
-              </div>
+              <AdminBar
+                links={links}
+                username={user.username}
+                isAdmin={user.isAdmin}
+                isCeo={!!user.isCeo}
+              />
             )}
           </div>
         </header>

@@ -13,8 +13,8 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const user = await getUserPublicById(id);
   if (!user) notFound();
-  // Only the SuperAdmin may open an admin account.
-  if (user.isAdmin && !me.isSuperAdmin) redirect("/admin/users");
+  // Only the SuperAdmin may open an admin or CEO account.
+  if ((user.isAdmin || user.isCeo) && !me.isSuperAdmin) redirect("/admin/users");
 
   return (
     <div className="admin-page">

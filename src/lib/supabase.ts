@@ -17,6 +17,10 @@ export function supabaseAdmin() {
 }
 
 export const CV_BUCKET = "cvs";
+/** Private bucket for the approval-requests pilot: request PDFs
+ *  (`requests/{id}/v{n}-...`), CEO-signed copies (`...-signed-...`), and the
+ *  CEO signature image (`signature/...`). Read via signed URLs only. */
+export const APPROVALS_BUCKET = "approvals";
 /** Public bucket for admin-uploaded site media (project photos, company logos,
  *  certificate scans). Public read; writes go through the service-role key in
  *  the auth-guarded upload route. */

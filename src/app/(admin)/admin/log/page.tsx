@@ -12,6 +12,7 @@ const CATEGORIES = [
   { key: "application", label: "Applications" },
   { key: "job", label: "Jobs" },
   { key: "content", label: "Content" },
+  { key: "approval", label: "Approvals" },
   { key: "user", label: "Users" },
   { key: "auth", label: "Sign-ins" },
 ];
@@ -20,6 +21,7 @@ const CAT_LABEL: Record<string, string> = {
   application: "Application",
   job: "Jobs",
   content: "Content",
+  approval: "Approvals",
   user: "Users",
   auth: "Auth",
 };

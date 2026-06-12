@@ -10,14 +10,26 @@ import {
   deleteUser,
   usernameTaken,
   getUserPublicById,
+  ceoExists,
 } from "@/lib/users";
 import { PERMISSIONS, type Permission } from "@/lib/permissions";
 import { logAction } from "@/lib/audit";
 
 export type UserActionState = { ok: boolean; message: string };
 
-function roleText(isAdmin: boolean, permissions: Permission[]): string {
-  return isAdmin ? "administrator" : permissions.join(", ") || "no access";
+type Role = "user" | "admin" | "ceo";
+
+function roleText(role: Role, permissions: Permission[]): string {
+  if (role === "admin") return "administrator";
+  if (role === "ceo") return "CEO";
+  return permissions.join(", ") || "no access";
+}
+
+function parseRole(formData: FormData): Role {
+  const role = String(formData.get("role") ?? "");
+  if (role === "admin" || role === "ceo" || role === "user") return role;
+  // Older form posts carried only the is_admin checkbox.
+  return formData.get("is_admin") === "on" ? "admin" : "user";
 }
 
 function parsePermissions(formData: FormData): Permission[] {
@@ -28,22 +40,28 @@ export async function createUserAction(_prev: UserActionState, formData: FormDat
   const actor = await requireSectionAction("users");
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const isAdmin = formData.get("is_admin") === "on";
+  const role = parseRole(formData);
   const permissions = parsePermissions(formData);
 
   if (username.length < 3) return { ok: false, message: "Username must be at least 3 characters." };
   if (password.length < 6) return { ok: false, message: "Password must be at least 6 characters." };
-  if (!isAdmin && permissions.length === 0)
-    return { ok: false, message: "Pick at least one section, or make the user an administrator." };
-  if (isAdmin && !canManageAdmins(actor))
-    return { ok: false, message: "Only the SuperAdmin can create admin accounts." };
+  if (role === "user" && permissions.length === 0)
+    return { ok: false, message: "Pick at least one section, or give the user a role." };
+  if (role !== "user" && !canManageAdmins(actor))
+    return { ok: false, message: "Only the SuperAdmin can assign this role." };
+  if (role === "ceo" && (await ceoExists()))
+    return { ok: false, message: "A CEO account already exists. There can only be one." };
   if (await usernameTaken(username)) return { ok: false, message: "That username is already taken." };
 
-  await createUser({ username, password, isAdmin, permissions });
+  try {
+    await createUser({ username, password, isAdmin: role === "admin", isCeo: role === "ceo", permissions });
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : "Could not create the user." };
+  }
   await logAction(actor, {
     action: "user.created",
-    summary: `Created user "${username}" (${roleText(isAdmin, permissions)})`,
-    details: { username, isAdmin, permissions },
+    summary: `Created user "${username}" (${roleText(role, permissions)})`,
+    details: { username, role, permissions },
   });
   revalidatePath("/admin/users");
   redirect("/admin/users");
@@ -53,25 +71,31 @@ export async function updateUserAction(_prev: UserActionState, formData: FormDat
   const actor = await requireSectionAction("users");
   const id = String(formData.get("id") ?? "");
   const username = String(formData.get("username") ?? "").trim();
-  const isAdmin = formData.get("is_admin") === "on";
+  const role = parseRole(formData);
   const permissions = parsePermissions(formData);
 
   if (!id) return { ok: false, message: "Missing user id." };
   if (username.length < 3) return { ok: false, message: "Username must be at least 3 characters." };
-  if (!isAdmin && permissions.length === 0)
-    return { ok: false, message: "Pick at least one section, or make the user an administrator." };
+  if (role === "user" && permissions.length === 0)
+    return { ok: false, message: "Pick at least one section, or give the user a role." };
   if (await usernameTaken(username, id)) return { ok: false, message: "That username is already taken." };
 
   const target = await getUserPublicById(id);
-  // Only the SuperAdmin may edit an admin account or grant the admin role.
-  if (!canManageAdmins(actor) && (target?.isAdmin || isAdmin))
-    return { ok: false, message: "Only the SuperAdmin can manage admin accounts." };
+  // Only the SuperAdmin may touch an admin or CEO account, or grant either role.
+  if (!canManageAdmins(actor) && (target?.isAdmin || target?.isCeo || role !== "user"))
+    return { ok: false, message: "Only the SuperAdmin can manage admin or CEO accounts." };
+  if (role === "ceo" && (await ceoExists(id)))
+    return { ok: false, message: "A CEO account already exists. There can only be one." };
 
-  await updateUser(id, { username, isAdmin, permissions });
+  try {
+    await updateUser(id, { username, isAdmin: role === "admin", isCeo: role === "ceo", permissions });
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : "Could not update the user." };
+  }
   await logAction(actor, {
     action: "user.updated",
-    summary: `Updated user "${username}" (${roleText(isAdmin, permissions)})`,
-    details: { id, username, isAdmin, permissions },
+    summary: `Updated user "${username}" (${roleText(role, permissions)})`,
+    details: { id, username, role, permissions },
   });
   revalidatePath("/admin/users");
   redirect("/admin/users");
@@ -85,8 +109,8 @@ export async function setPasswordAction(_prev: UserActionState, formData: FormDa
   if (password.length < 6) return { ok: false, message: "Password must be at least 6 characters." };
 
   const target = await getUserPublicById(id);
-  if (target?.isAdmin && !canManageAdmins(actor))
-    return { ok: false, message: "Only the SuperAdmin can reset an admin's password." };
+  if ((target?.isAdmin || target?.isCeo) && !canManageAdmins(actor))
+    return { ok: false, message: "Only the SuperAdmin can reset this account's password." };
   await setUserPassword(id, password);
   await logAction(actor, {
     action: "user.password_reset",
@@ -106,8 +130,8 @@ export async function deleteUserAction(formData: FormData) {
   if (me?.id === id) throw new Error("You can't delete your own account.");
 
   const target = await getUserPublicById(id);
-  if (target?.isAdmin && !canManageAdmins(actor))
-    throw new Error("Only the SuperAdmin can remove admin accounts.");
+  if ((target?.isAdmin || target?.isCeo) && !canManageAdmins(actor))
+    throw new Error("Only the SuperAdmin can remove admin or CEO accounts.");
 
   await deleteUser(id);
   await logAction(actor, {

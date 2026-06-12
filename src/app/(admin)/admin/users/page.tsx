@@ -62,14 +62,16 @@ export default async function UsersPage() {
           <div className="admin-table__row" key={u.id}>
             <span>{u.username}</span>
             <span className="user-access">
-              {u.isAdmin
-                ? "Administrator"
-                : u.permissions.length
-                  ? u.permissions.map((p) => PERMISSION_LABELS[p]).join(", ")
-                  : "No access"}
+              {u.isCeo
+                ? "CEO"
+                : u.isAdmin
+                  ? "Administrator"
+                  : u.permissions.length
+                    ? u.permissions.map((p) => PERMISSION_LABELS[p]).join(", ")
+                    : "No access"}
             </span>
             <span className="user-actions">
-              {me.isSuperAdmin || !u.isAdmin ? (
+              {me.isSuperAdmin || (!u.isAdmin && !u.isCeo) ? (
                 <>
                   <Link className="btn btn--ghost btn--sm" href={`/admin/users/${u.id}/edit`}>
                     Edit

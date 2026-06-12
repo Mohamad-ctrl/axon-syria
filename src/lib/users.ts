@@ -15,6 +15,7 @@ type Row = {
   id: string;
   username: string;
   is_admin: boolean;
+  is_ceo: boolean;
   permissions: string[] | null;
   password_changed_at: string;
 };
@@ -23,7 +24,13 @@ function toUser(row: Row): AdminUser {
   const perms = (row.permissions ?? []).filter((p): p is Permission =>
     (PERMISSIONS as string[]).includes(p),
   );
-  return { id: row.id, username: row.username, isAdmin: row.is_admin, permissions: perms };
+  return {
+    id: row.id,
+    username: row.username,
+    isAdmin: row.is_admin,
+    isCeo: row.is_ceo || undefined,
+    permissions: perms,
+  };
 }
 
 export function normalizeUsername(username: string): string {
@@ -54,7 +61,7 @@ export function verifyPassword(password: string, stored: string): boolean {
 
 /* ------------------------------------------------------------------------ CRUD */
 
-const SELECT = "id,username,is_admin,permissions,password_changed_at";
+const SELECT = "id,username,is_admin,is_ceo,permissions,password_changed_at";
 
 export async function listUsers(): Promise<AdminUser[]> {
   if (!hasSupabaseEnv()) return [];
@@ -79,7 +86,17 @@ export async function getUserById(
 
 export async function getUserPublicById(id: string): Promise<AdminUser | null> {
   const u = await getUserById(id);
-  return u ? { id: u.id, username: u.username, isAdmin: u.isAdmin, permissions: u.permissions } : null;
+  if (!u) return null;
+  return { id: u.id, username: u.username, isAdmin: u.isAdmin, isCeo: u.isCeo, permissions: u.permissions };
+}
+
+/** Whether a CEO account already exists (optionally ignoring one id, for
+ *  edits). App-level guard; the partial unique index in the DB is the
+ *  backstop against races. */
+export async function ceoExists(exceptId?: string): Promise<boolean> {
+  if (!hasSupabaseEnv()) return false;
+  const { data } = await supabaseAdmin().from("admin_users").select("id").eq("is_ceo", true);
+  return ((data as { id: string }[] | null) ?? []).some((r) => r.id !== exceptId);
 }
 
 /** Login lookup: returns the id + stored hash for a username, or null. */
@@ -110,27 +127,34 @@ export async function createUser(input: {
   username: string;
   password: string;
   isAdmin: boolean;
+  isCeo: boolean;
   permissions: Permission[];
 }): Promise<void> {
+  // The roles are mutually exclusive: a CEO is never an admin and carries no
+  // permissions subset (access comes from the role itself in `can()`).
+  const isAdmin = input.isCeo ? false : input.isAdmin;
   const { error } = await supabaseAdmin().from("admin_users").insert({
     username: normalizeUsername(input.username),
     password_hash: hashPassword(input.password),
-    is_admin: input.isAdmin,
-    permissions: input.isAdmin ? [] : input.permissions,
+    is_admin: isAdmin,
+    is_ceo: input.isCeo,
+    permissions: isAdmin || input.isCeo ? [] : input.permissions,
   });
   if (error) throw new Error(error.message);
 }
 
 export async function updateUser(
   id: string,
-  input: { username: string; isAdmin: boolean; permissions: Permission[] },
+  input: { username: string; isAdmin: boolean; isCeo: boolean; permissions: Permission[] },
 ): Promise<void> {
+  const isAdmin = input.isCeo ? false : input.isAdmin;
   const { error } = await supabaseAdmin()
     .from("admin_users")
     .update({
       username: normalizeUsername(input.username),
-      is_admin: input.isAdmin,
-      permissions: input.isAdmin ? [] : input.permissions,
+      is_admin: isAdmin,
+      is_ceo: input.isCeo,
+      permissions: isAdmin || input.isCeo ? [] : input.permissions,
     })
     .eq("id", id);
   if (error) throw new Error(error.message);

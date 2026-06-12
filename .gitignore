@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+# generated sign-pdf test fixtures (recreate with scripts/make-test-pdfs.mjs)
+/scripts/fixtures/
 
 # next.js
 /.next/
